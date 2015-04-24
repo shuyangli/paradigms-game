@@ -8,19 +8,18 @@ class CastleServerProtocol(Protocol):
         self.factory = factory
 
     def connectionMade(self):
-        pass
+        print "New connection"
 
     def connectionLost(self, reason):
-        pass
+        print "Lost connection"
 
     def dataReceived(self, data):
         # Receive a command from the client
-        pass
+        print data
 
 
 class CastleServerProtocolFactory(Factory):
     def __init__(self, castle_server):
-        super(CastleServerProtocolFactory, self).__init__()
         self.castle_server = castle_server
 
     def buildProtocol(self, ipv4addr):
@@ -28,13 +27,12 @@ class CastleServerProtocolFactory(Factory):
         return new_protocol
 
 
-class CastleServer(object):
+class CastleServer:
     def __init__(self, port, debug=False):
-        super(CastleServer, self).__init__()
         self.port = port
         self.debug = debug
 
-    def start():
+    def start(self):
         # Start listening
         server_protocol_factory = CastleServerProtocolFactory(self)
         endpoint = TCP4ServerEndpoint(reactor, self.port)
