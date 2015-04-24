@@ -8,9 +8,11 @@ class CastleServerProtocol(Protocol):
         self.factory = factory
 
     def connectionMade(self):
+        self.factory.observers.append(self)
         print "New connection"
 
     def connectionLost(self, reason):
+        self.factory.observers.remove(self)
         print "Lost connection"
 
     def dataReceived(self, data):
@@ -21,6 +23,8 @@ class CastleServerProtocol(Protocol):
 class CastleServerProtocolFactory(Factory):
     def __init__(self, castle_server):
         self.castle_server = castle_server
+        self.players = []
+        self.observers = []
 
     def buildProtocol(self, ipv4addr):
         new_protocol = CastleServerProtocol(self)
