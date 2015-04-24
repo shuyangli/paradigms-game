@@ -1,5 +1,6 @@
 from twisted.internet.protocol import Factory, ClientFactory, Protocol
 from twisted.protocols.basic import LineReceiver
+from twisted.internet.task import LoopingCall   # Let Twisted run main loop
 from twisted.internet import reactor
 
 from castle_game import CastleGameCommands, CastleGameModel
@@ -34,6 +35,8 @@ class CastleClientProtocolFactory(ClientFactory):
 
 class CastleClient:
     """Castle game client class."""
+    DESIRED_FPS = 60.0      # FPS requested
+
     def __init__(self, debug=False):
         global DEBUG
         DEBUG = debug
@@ -41,6 +44,10 @@ class CastleClient:
     def setServer(self, host, port):
         self.server_host = host
         self.server_port = port
+
+    def setGameGUI(self, game):
+        self.gametick = LoopingCall(game.gametick)
+        self.gametick.start(1.0 / self.DESIRED_FPS)
 
     def connect(self):
         client_protocol_factory = CastleClientProtocolFactory(self)
