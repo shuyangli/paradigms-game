@@ -1,30 +1,39 @@
 from twisted.internet.protocol import Factory, Protocol
+from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint
-import twisted.internet.reactor as reactor
+from twisted.internet import reactor
+
+from castle_game import CastleGameCommands, CastleGameModel
 
 
-class CastleServerProtocol(Protocol):
+class CastleServerProtocol(LineReceiver):
     def __init__(self, factory):
         self.factory = factory
 
     def connectionMade(self):
-        self.factory.observers.append(self)
-        print "New connection"
+        self.factory.players.append(self)
+        if DEBUG:
+            print "New connection from {0}".format(self.transport.getPeer())
 
     def connectionLost(self, reason):
-        self.factory.observers.remove(self)
-        print "Lost connection"
+        self.factory.players.remove(self)
+        if DEBUG:
+            print "Lost connection from {0}".format(self.transport.getPeer())
 
-    def dataReceived(self, data):
+    def lineReceived(self, line):
         # Receive a command from the client
-        print data
+        if DEBUG:
+            print line
+
+        # TODO: Send some actual response back to the client
+        # response = line
+        # self.sendLine(response)
 
 
 class CastleServerProtocolFactory(Factory):
     def __init__(self, castle_server):
         self.castle_server = castle_server
         self.players = []
-        self.observers = []
 
     def buildProtocol(self, ipv4addr):
         new_protocol = CastleServerProtocol(self)
@@ -32,9 +41,11 @@ class CastleServerProtocolFactory(Factory):
 
 
 class CastleServer:
+    """Castle game server class."""
     def __init__(self, port, debug=False):
         self.port = port
-        self.debug = debug
+        global DEBUG
+        DEBUG = debug
 
     def start(self):
         # Start listening
