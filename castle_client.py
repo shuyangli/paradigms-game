@@ -1,12 +1,11 @@
 from twisted.internet.protocol import Factory, ClientFactory, Protocol
-from twisted.protocols.basic import LineReceiver
 from twisted.internet.task import LoopingCall   # Let Twisted run main loop
 from twisted.internet import reactor
 
 from castle_game import CastleGameCommands, CastleGameModel
 
 
-class CastleClientProtocol(LineReceiver):
+class CastleClientProtocol(Protocol):
     def __init__(self, client):
         self.client = client
 
@@ -16,10 +15,10 @@ class CastleClientProtocol(LineReceiver):
     def connectionLost(self, reason):
         pass
 
-    def lineReceived(self, line):
+    def dataReceived(self, data):
         # Received a response from the server
         if DEBUG:
-            print line
+            print data
 
 
 class CastleClientProtocolFactory(ClientFactory):

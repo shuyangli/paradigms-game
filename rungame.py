@@ -14,5 +14,6 @@ if __name__ == '__main__':
     client.setServer(args.host, args.port)
 
     game = CastleGameUI()
+    game.setClient(client)
     client.setGameGUI(game)
     client.connect()

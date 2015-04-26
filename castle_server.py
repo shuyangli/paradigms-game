@@ -1,12 +1,11 @@
 from twisted.internet.protocol import Factory, Protocol
-from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet import reactor
 
 from castle_game import CastleGameCommands, CastleGameModel
 
 
-class CastleServerProtocol(LineReceiver):
+class CastleServerProtocol(Protocol):
     def __init__(self, server):
         self.server = server
 
@@ -20,14 +19,14 @@ class CastleServerProtocol(LineReceiver):
         if DEBUG:
             print "Lost connection from {0}".format(self.transport.getPeer())
 
-    def lineReceived(self, line):
+    def dataReceived(self, data):
         # Receive a command from the client
         if DEBUG:
-            print line
+            print data
 
         # TODO: Send some actual response back to the client
-        # response = line
-        # self.sendLine(response)
+        # response = data
+        # self.transport.write(response)
 
 
 class CastleServerProtocolFactory(Factory):
@@ -44,6 +43,7 @@ class CastleServer:
     def __init__(self, port, debug=False):
         self.port = port
         self.players = []
+
         global DEBUG
         DEBUG = debug
 
