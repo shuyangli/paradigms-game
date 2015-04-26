@@ -7,16 +7,16 @@ from castle_game import CastleGameCommands, CastleGameModel
 
 
 class CastleServerProtocol(LineReceiver):
-    def __init__(self, factory):
-        self.factory = factory
+    def __init__(self, server):
+        self.server = server
 
     def connectionMade(self):
-        self.factory.players.append(self)
+        self.server.players.append(self)
         if DEBUG:
             print "New connection from {0}".format(self.transport.getPeer())
 
     def connectionLost(self, reason):
-        self.factory.players.remove(self)
+        self.server.players.remove(self)
         if DEBUG:
             print "Lost connection from {0}".format(self.transport.getPeer())
 
@@ -33,10 +33,9 @@ class CastleServerProtocol(LineReceiver):
 class CastleServerProtocolFactory(Factory):
     def __init__(self, castle_server):
         self.castle_server = castle_server
-        self.players = []
 
     def buildProtocol(self, ipv4addr):
-        new_protocol = CastleServerProtocol(self)
+        new_protocol = CastleServerProtocol(self.castle_server)
         return new_protocol
 
 
@@ -44,6 +43,7 @@ class CastleServer:
     """Castle game server class."""
     def __init__(self, port, debug=False):
         self.port = port
+        self.players = []
         global DEBUG
         DEBUG = debug
 

@@ -1,6 +1,6 @@
 import argparse
 from castle_client import CastleClient
-from castle_game import CastleGameGUI
+from castle_game_ui import CastleGameUI
 
 if __name__ == '__main__':
     # Parse command line arguments
@@ -13,6 +13,6 @@ if __name__ == '__main__':
     client = CastleClient(args.debug)
     client.setServer(args.host, args.port)
 
-    game = CastleGameGUI()
+    game = CastleGameUI()
     client.setGameGUI(game)
     client.connect()
