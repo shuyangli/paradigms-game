@@ -44,8 +44,9 @@ class CastleClient:
         self.server_port = port
 
     def setGameGUI(self, game):
-        self.gametick = LoopingCall(game.gametick)
-        self.gametick.start(1.0 / self.DESIRED_FPS)
+        self.game = game
+        self.ui_tick = LoopingCall(game.tick)
+        self.ui_tick.start(1.0 / self.DESIRED_FPS)
 
     def connect(self):
         client_protocol_factory = CastleClientProtocolFactory(self)
