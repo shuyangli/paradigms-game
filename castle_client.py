@@ -34,7 +34,14 @@ class CastleClient:
     """Castle game client class."""
     DESIRED_FPS = 60.0      # FPS requested
 
+    # Game states
+    GAME_STATE_WAITING = 0
+    GAME_STATE_READY   = 1
+    GAME_STATE_PLAYING = 2
+
     def __init__(self, debug=False):
+        self.current_state = GAME_STATE_WAITING
+
         global DEBUG
         DEBUG = debug
 
