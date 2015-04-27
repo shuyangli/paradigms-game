@@ -1,5 +1,4 @@
 import sys, os
-import time
 import pygame
 from pygame.locals import *
 
@@ -10,12 +9,7 @@ class CastleGameUI:
 
     # 5 game frames per lockstep, 10 locksteps per second
     GAME_FRAMES_PER_LOCK_STEP = 5
-
-    real_time = 0.0
-    accumulated_time = 0.0
-
     game_frame_id = 0
-
 
     def __init__(self):
         # Init pygame
