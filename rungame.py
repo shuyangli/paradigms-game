@@ -11,9 +11,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     client = CastleClient(args.debug)
-    client.setServer(args.host, args.port)
+    client.set_server(args.host, args.port)
 
-    game = CastleGameUI()
-    game.setClient(client)
-    client.setGameGUI(game)
+    game_ui = CastleGameUI()
+    game_ui.set_client(client)
+    client.set_game_gui(game_ui)
     client.connect()

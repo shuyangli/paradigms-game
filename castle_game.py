@@ -50,3 +50,6 @@ class CastleGameModel:
     """Castle game model class. This class represents the game state."""
     def __init__(self):
         pass
+
+    def apply_command(self, cmd):
+        pass
