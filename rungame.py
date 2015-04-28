@@ -16,4 +16,7 @@ if __name__ == '__main__':
     game_ui = CastleGameUI()
     game_ui.set_client(client)
     client.set_game_gui(game_ui)
+
+    # DEBUG
+    game_ui.start_game()
     client.connect()

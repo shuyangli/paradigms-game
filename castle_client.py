@@ -4,21 +4,41 @@ from twisted.internet import reactor
 
 from castle_game import CastleGameCommand, CastleGameModel
 
+import json                     # For serializing dicts
+
 
 class CastleClientProtocol(Protocol):
+    PAYLOAD_TYPE_COMMAND = "cmd"
+
     def __init__(self, client):
         self.client = client
 
     def connectionMade(self):
-        pass
+        if DEBUG:
+            print "Connection made with server:{0}".format(self.transport.getPeer())
+        self.client.conn = self
 
     def connectionLost(self, reason):
-        pass
+        if DEBUG:
+            print "Connection lost from server:{0}".format(self.transport.getPeer())
+        self.client.conn = None
 
     def dataReceived(self, data):
         # Received a response from the server
         if DEBUG:
             print data
+        ddict = json.loads(data)
+
+    def sendCommandDict(self, cmd_dict):
+        # cmd_dict: {"turn": turn, "command": cmd}
+        # final dict: {"type": "cmd", "lturn": cmd_dict["turn"], "cmd": cmd_dict["command"].serialize()}
+        final_cmd = {
+            "type": self.PAYLOAD_TYPE_COMMAND,
+            "lturn": cmd_dict["turn"],
+            "cmd": cmd_dict["command"].serialize()
+        }
+        print final_cmd
+        self.transport.write(json.dumps(final_cmd))
 
 
 class CastleClientProtocolFactory(ClientFactory):
@@ -48,9 +68,8 @@ class CastleClient:
 
     def __init__(self, debug=False):
         self.current_state = self.GAME_STATE_PLAYING
-
-        self.ready_commands = []
-        self.pending_commands = []
+        self.pending_commands = []  # [{"turn": turn, "command": cmd}]
+        self.conn = None
 
         global DEBUG
         DEBUG = debug
@@ -76,7 +95,19 @@ class CastleClient:
     # Command handling
     # ================
     def queue_command(self, cmd):
-        pass
+        # Queue command to be executed AFTER the NEXT lockstep
+        cmd_dict = {"turn": self.lock_step_id + 2, "command": cmd}
+        self.pending_commands.append(cmd_dict)
+        self.conn.sendCommandDict(cmd_dict)
+
+    @property
+    def ready_commands(self):
+        # Compute commands that are ready to be executed in the CURRENT lockstep
+        cmds = [x for x in self.pending_commands if x["turn"] == self.lock_step_id]
+        for c in cmds:
+            self.pending_commands.remove(c)
+
+        return cmds
 
     # =================
     # Ticking mechanism
@@ -84,8 +115,6 @@ class CastleClient:
     def tick_lock_step(self):
         # Called every lock step (~10 fps), simulate actual game
         # Check if it's ready first, and return false if it's not ready to advance
-        print "Lock step tick"
-
         self.lock_step_id += 1
         for cmd in self.ready_commands:
             self.game_model.apply_command(cmd)

@@ -31,6 +31,17 @@ class CastleGameUI:
         self.client = client
 
 
+    # ===================
+    # Starting a new game
+    # ===================
+    def start_game(self):
+        self.game_model = CastleGameModel()
+        self.client.set_game_model(self.game_model)
+
+    def end_game(self):
+        self.client.set_game_model(None)
+        self.game_model = None
+
     # ===============================
     # Ticking mechanism
     # These are called every UI frame
@@ -46,8 +57,6 @@ class CastleGameUI:
 
     def ui_tick_game(self):
         # Called every actual frame (hopefully 50 fps)
-        print "UI tick"
-
         # First process lockstep stuff
         if self.game_frame_id == 0:
             # Every first game frame, we advance the lock step
@@ -64,8 +73,8 @@ class CastleGameUI:
         # Process events
         for e in pygame.event.get():
             if e.type == KEYDOWN:
+                # DEBUG
                 if e.key == K_1:
-                    # Test
                     cmd = CastleGameCommand.Build(CastleGameCommand.Build.HOUSE, 0, 0)
                     self.client.queue_command(cmd)
 
