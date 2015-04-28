@@ -2,7 +2,8 @@ import sys, os
 import pygame
 from pygame.locals import *
 
-from castle_game import CastleGameCommands, CastleGameModel
+from castle_game import CastleGameCommand, CastleGameModel
+from castle_game_sprites import *
 
 class CastleGameUI:
     """UI class for Castle game."""

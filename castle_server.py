@@ -2,7 +2,7 @@ from twisted.internet.protocol import Factory, Protocol
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet import reactor
 
-from castle_game import CastleGameCommands, CastleGameModel
+from castle_game import CastleGameCommand, CastleGameModel
 
 
 class CastleServerProtocol(Protocol):

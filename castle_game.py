@@ -1,49 +1,71 @@
-class CastleGameCommands:
-    """Wrapper class for game commands and command builder."""
+class CastleGameCommand:
+    """Wrapper class for game commands and command deserializer."""
     CMD_SEPARATOR = "#"
-    CMD_VERB = {
-        "build": "B",
-        "destroy": "D",
-        "route": "R",
-        "B": "build",
-        "D": "destroy",
-        "R": "route"
-    }
-    CMD_BUILD_BUILDING = {
-        "house": "h",
-        "tower": "t",
-        "market": "m",
-        "h": "house",
-        "t": "tower",
-        "m": "market"
-    }
 
-    @classmethod
-    def encode_command(cls, decoded):   # take a list
-        [command, location_x, location_y, option] = decoded
+    class Build:
+        HOUSE = "h"
+        TOWER = "t"
+        MARKET = "m"
 
-        encoded = "{0}{1}{2}{3}{4}{5}{6}".format(
-            self.CMD_VERB[command],
-            self.CMD_SEPARATOR,
-            str(location_x),
-            self.CMD_SEPARATOR,
-            str(location_y),
-            self.CMD_SEPARATOR,
-            option
-        )
-        return encoded                  # return a string
+        def __init__(self, building, x, y):
+            self.building = building
+            self.x = x
+            self.y = y
+
+        def serialize(self):
+            return "B{0}{1}{2}{3}{4}{5}".format(
+                CastleGameCommand.CMD_SEPARATOR,
+                self.x,
+                CastleGameCommand.CMD_SEPARATOR,
+                self.y,
+                CastleGameCommand.CMD_SEPARATOR,
+                self.building
+            )
+
+        @classmethod
+        def deserialize(cls, encoded):
+            _, x, y, building = encoded.split(CastleGameCommand.CMD_SEPARATOR)
+            return cls(building, int(x), int(y))
+
+
+    class Destroy:
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
+        def serialize(self):
+            return "D{0}{1}{2}{3}".format(
+                CastleGameCommand.CMD_SEPARATOR,
+                self.x,
+                CastleGameCommand.CMD_SEPARATOR,
+                self.y
+            )
+
+        @classmethod
+        def deserialize(cls, encoded):
+            _, x, y = encoded.split(CastleGameCommand.CMD_SEPARATOR)
+            return cls(int(x), int(y))
+
+
+    class Route:
+        # TODO: figure out how to handle rerouting of a house
+        def __init__(self, house_x, house_y, past_x, past_y, current_x, current_y):
+            self.h_x = house_x
+            self.h_y = house_y
+            self.p_x = past_x
+            self.p_y = past_y
+            self.c_x = current_x
+            self.c_y = current_y
+
 
     @classmethod
     def decode_command(cls, encoded):   # take a string
-        [command, location_x, location_y, option] = encoded.split(self.CMD_SEPARATOR)
-
-        decoded = [
-            self.CMD_VERB[command],
-            int(location_x),
-            int(location_y),
-            option
-        ]
-        return decoded                  # return a list
+        if encoded[0] == "B":
+            return Build.deserialize(encoded)
+        elif encoded[0] == "D":
+            return Destroy.deserialize(encoded)
+        else:
+            raise ValueError("Unknown encoded command: {0}".format(encoded))
 
 
 class CastleGameModel:

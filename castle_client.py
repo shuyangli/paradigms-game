@@ -2,7 +2,7 @@ from twisted.internet.protocol import Factory, ClientFactory, Protocol
 from twisted.internet.task import LoopingCall   # Let Twisted run main loop
 from twisted.internet import reactor
 
-from castle_game import CastleGameCommands, CastleGameModel
+from castle_game import CastleGameCommand, CastleGameModel
 
 
 class CastleClientProtocol(Protocol):
@@ -40,6 +40,7 @@ class CastleClient:
     GAME_STATE_WAITING = 0
     GAME_STATE_READY   = 1
     GAME_STATE_PLAYING = 2
+    GAME_STATE_MENU    = 3
 
     # For synchronized ticking mechanism
     lock_step_id = 0
@@ -71,6 +72,12 @@ class CastleClient:
         reactor.connectTCP(self.server_host, self.server_port, client_protocol_factory)
         reactor.run()
 
+    # ================
+    # Command handling
+    # ================
+    def queue_command(self, cmd):
+        pass
+
     # =================
     # Ticking mechanism
     # =================
@@ -86,7 +93,9 @@ class CastleClient:
 
     def tick_ui(self):
         # Dispatcher for UI tick
-        if self.current_state == self.GAME_STATE_WAITING:
+        if self.current_state == self.GAME_STATE_MENU:
+            self.game_ui.ui_tick_menu()
+        elif self.current_state == self.GAME_STATE_WAITING:
             self.game_ui.ui_tick_waiting()
         elif self.current_state == self.GAME_STATE_READY:
             self.game_ui.ui_tick_ready()
