@@ -9,35 +9,39 @@ class CastleGameUI:
     """UI class for Castle game."""
 
     # 5 game frames per lockstep, 10 locksteps per second
+    # Realistically this would change based on network latency
     GAME_FRAMES_PER_LOCK_STEP = 5
     game_frame_id = 0
 
     def __init__(self):
         # Init pygame
-        pygame.init()
-        pygame.mixer.init()         # for sound
+        self.init_pygame()
 
         # Init other aspects
+
+
+    def init_pygame(self):
+        pygame.init()
+        pygame.mixer.init()         # for sound
+        self.screen_size = (640, 480)
+        self.screen = pygame.display.set_mode(self.screen_size)
 
 
     def set_client(self, client):
         self.client = client
 
 
-    # =============
-    # Game handling
-    # =============
-    def start_actual_game():
-        pass
-
-
-    # =================
+    # ===============================
     # Ticking mechanism
-    # =================
-    def ui_tick_ready(self):
+    # These are called every UI frame
+    # ===============================
+    def ui_tick_menu(self):
         pass
 
     def ui_tick_waiting(self):
+        pass
+
+    def ui_tick_ready(self):
         pass
 
     def ui_tick_game(self):
@@ -58,11 +62,14 @@ class CastleGameUI:
 
         # Then handle regular game stuff
         # Process events
-        # for event in pygame.event.get():
-        #     pass
+        for e in pygame.event.get():
+            if e.type == KEYDOWN:
+                if e.key == K_1:
+                    cmd = CastleGameCommand.Build(["build", 0, 0, "house"])
+                    self.client.queue_command(cmd)
 
         # Drawing
         # for sprite in self.sprites:
         #     sprite.draw()
         #
-        # pygame.display.flip()
+        pygame.display.flip()
