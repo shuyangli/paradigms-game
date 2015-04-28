@@ -65,7 +65,8 @@ class CastleGameUI:
         for e in pygame.event.get():
             if e.type == KEYDOWN:
                 if e.key == K_1:
-                    cmd = CastleGameCommand.Build(["build", 0, 0, "house"])
+                    # Test
+                    cmd = CastleGameCommand.Build(CastleGameCommand.Build.HOUSE, 0, 0)
                     self.client.queue_command(cmd)
 
         # Drawing
