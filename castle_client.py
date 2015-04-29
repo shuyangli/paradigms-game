@@ -10,6 +10,7 @@ import json                     # For serializing dicts
 class CastleClientProtocol(Protocol):
     PAYLOAD_TYPE_COMMAND = "cmd"
     PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
+    FAYLOAD_TYPE_ERROR = "error"
 
     def __init__(self, client):
         self.client = client
@@ -23,6 +24,7 @@ class CastleClientProtocol(Protocol):
         if DEBUG:
             print "Connection lost from server:{0}".format(self.transport.getPeer())
         self.client.conn = None
+        # TODO (SL): this should be a fatal error
 
     def dataReceived(self, data):
         # Received a response from the server
@@ -30,10 +32,14 @@ class CastleClientProtocol(Protocol):
         if DEBUG:
             print ddict
 
-        if ddict["type"] == self.PAYLOAD_TYPE_COMMAND:
+        if ddict["type"] == self.FAYLOAD_TYPE_ERROR:
+            # error: {"type": "error", "info": info}
+            if DEBUG: print ddict
+
+        elif ddict["type"] == self.PAYLOAD_TYPE_COMMAND:
             # game command: {"type": "cmd", "lturn": cmd_dict["turn"], "cmd": cmd_dict["command"].serialize()}
             # cmd_dict: {"turn": turn, "command": cmd}
-            cmd_dict = {"turn": int(ddict["turn"]), "command": CastleGameCommand.decode_command(ddict["cmd"])}
+            cmd_dict = {"turn": int(ddict["lturn"]), "command": CastleGameCommand.decode_command(ddict["cmd"])}
             self.client.receive_game_command(cmd_dict)
         elif ddict["type"] == self.PAYLOAD_TYPE_STATE_CHANGE:
             # state change: {"type": "chgstate", "state": state}

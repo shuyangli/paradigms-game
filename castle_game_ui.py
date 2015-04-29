@@ -9,9 +9,9 @@ from castle_game_sprites import *
 class CastleGameUI:
     """UI class for Castle game."""
 
-    # 5 game frames per lockstep, 10 locksteps per second
+    # 10 game frames per lockstep, 5 locksteps per second
     # Realistically this would change based on network latency
-    GAME_FRAMES_PER_LOCK_STEP = 5
+    GAME_FRAMES_PER_LOCK_STEP = 10
     game_frame_id = 0
 
     def __init__(self):
@@ -25,7 +25,7 @@ class CastleGameUI:
         pygame.init()
         self.screen_size = (640, 480)
         self.screen = pygame.display.set_mode(self.screen_size)
-        self.font = pygame.ftfont.Font(None, 13)
+        self.font = pygame.ftfont.Font(None, 26)
 
 
     def set_client(self, client):

@@ -38,8 +38,10 @@ class CastleServerProtocol(Protocol):
 
     def rejectClient(self):
         # rejection: {"type": "error", "info": "game is on"}
-        ddict = {"type": self.PAYLOAD_TYPE_STATE_CHANGE, "info": "Game is currently on"}
-        self.transport.write(json.dumps(ddict))
+        ddict = {"type": self.PAYLOAD_TYPE_ERROR, "info": "Game is currently on"}
+        payload = json.dumps(ddict)
+        if DEBUG: print payload
+        self.transport.write(payload)
         self.transport.loseConnection()
 
 
@@ -121,6 +123,7 @@ class CastleServer:
 
     def broadcast_command(self, origin_protocol, cmd_dict):
         payload = json.dumps(cmd_dict)
+        if DEBUG: print payload
         dests = [x for x in self.players if x != origin_protocol]
         for d in dests:
             d.transport.write(payload)
@@ -128,5 +131,6 @@ class CastleServer:
     def broadcast_ready(self):
         payload_dict = {"type": self.PAYLOAD_TYPE_STATE_CHANGE, "state": self.GAME_STATE_PLAYING}
         payload = json.dumps(payload_dict)
+        if DEBUG: print payload
         for d in self.players:
             d.transport.write(payload)

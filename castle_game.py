@@ -61,9 +61,9 @@ class CastleGameCommand:
     @classmethod
     def decode_command(cls, encoded):   # take a string
         if encoded[0] == "B":
-            return Build.deserialize(encoded)
+            return cls.Build.deserialize(encoded)
         elif encoded[0] == "D":
-            return Destroy.deserialize(encoded)
+            return cls.Destroy.deserialize(encoded)
         else:
             raise ValueError("Unknown encoded command: {0}".format(encoded))
 
