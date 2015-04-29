@@ -5,13 +5,13 @@ from castle_game_ui import CastleGameUI
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Castles game.")
-    parser.add_argument("-s", "--server", type=str, dest="host", help="server address", required=True)
+    parser.add_argument("-s", "--server", type=str, dest="server", help="server address", required=True)
     parser.add_argument("-p", "--port", type=int, default=9001, dest="port", help="server port number")
     parser.add_argument("-d", "--debug", action="store_true", dest="debug", help="enable debug mode")
     args = parser.parse_args()
 
     client = CastleClient(args.debug)
-    client.set_server(args.host, args.port)
+    client.set_server(args.server, args.port)
 
     game_ui = CastleGameUI()
     game_ui.set_client(client)
