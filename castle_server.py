@@ -10,11 +10,17 @@ import json
 class CastleServerProtocol(Protocol):
     PAYLOAD_TYPE_COMMAND = "cmd"
     PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
+    FAYLOAD_TYPE_ERROR = "error"
 
     def __init__(self, server):
         self.server = server
 
     def connectionMade(self):
+        # Check if game is on; if it's on, deny incoming connection
+        if self.server.is_game_on():
+            self.rejectClient()
+            return
+
         self.server.players.append(self)
         self.server.player_states[self] = self.server.GAME_STATE_MENU
 
@@ -23,10 +29,19 @@ class CastleServerProtocol(Protocol):
             print self.server.player_states
 
     def connectionLost(self, reason):
-        self.server.players.remove(self)
-        self.server.player_states.pop(self, None)
+        print reason
+        if self in self.server.players:
+            self.server.players.remove(self)
+            self.server.player_states.pop(self, None)
         if DEBUG:
             print "Lost connection from {0}".format(self.transport.getPeer())
+
+    def rejectClient(self):
+        # rejection: {"type": "error", "info": "game is on"}
+        ddict = {"type": self.PAYLOAD_TYPE_STATE_CHANGE, "info": "Game is currently on"}
+        self.transport.write(json.dumps(ddict))
+        self.transport.loseConnection()
+
 
     def dataReceived(self, data):
         # Receive a command from the client
@@ -83,12 +98,21 @@ class CastleServer:
         endpoint.listen(server_protocol_factory)
         reactor.run()
 
+    def is_game_on(self):
+        if len(self.players) > 0:
+            return (self.player_states[self.players[0]] == self.GAME_STATE_PLAYING)
+        else:
+            return False
+
     # =================================
     # Command handling and broadcasting
     # =================================
     def is_everyone_ready(self):
         if DEBUG:
             print self.player_states
+
+        if len(self.players) < 2:
+            return False
 
         for player in self.players:
             if self.player_states[player] != self.GAME_STATE_READY:
