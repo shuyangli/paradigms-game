@@ -47,14 +47,38 @@ class CastleGameUI:
     # These are called every UI frame
     # ===============================
     def ui_tick_menu(self):
-        pass
+        # Process events
+        for e in pygame.event.get():
+            if e.type == KEYDOWN:
+                # DEBUG
+                if e.key == K_SPACE:
+                    self.client.change_state_waiting()
+
+        # Drawing
+        pygame.display.flip()
 
     def ui_tick_waiting(self):
-        pass
+        # Process events
+        for e in pygame.event.get():
+            if e.type == KEYDOWN:
+                # DEBUG
+                if e.key == K_SPACE:
+                    self.client.change_state_ready()
+
+        # Drawing
+        pygame.display.flip()
 
     def ui_tick_ready(self):
-        pass
+        # Process events
+        for e in pygame.event.get():
+            pass
 
+        # Drawing
+        pygame.display.flip()
+
+    # ===================
+    # Actual game ticking
+    # ===================
     def ui_tick_game(self):
         # Called every actual frame (hopefully 50 fps)
         # First process lockstep stuff
@@ -74,7 +98,7 @@ class CastleGameUI:
         for e in pygame.event.get():
             if e.type == KEYDOWN:
                 # DEBUG
-                if e.key == K_1:
+                if e.key == K_SPACE:
                     cmd = CastleGameCommand.Build(CastleGameCommand.Build.HOUSE, 0, 0)
                     self.client.queue_command(cmd)
 
