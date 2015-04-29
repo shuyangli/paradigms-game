@@ -103,11 +103,7 @@ class CastleClient:
     @property
     def ready_commands(self):
         # Compute commands that are ready to be executed in the CURRENT lockstep
-        cmds = [x for x in self.pending_commands if x["turn"] == self.lock_step_id]
-        for c in cmds:
-            self.pending_commands.remove(c)
-
-        return cmds
+        return [x for x in self.pending_commands if x["turn"] == self.lock_step_id]
 
     # =================
     # Ticking mechanism
@@ -118,6 +114,8 @@ class CastleClient:
         self.lock_step_id += 1
         for cmd in self.ready_commands:
             self.game_model.apply_command(cmd)
+            self.pending_commands.remove(cmd)
+
         return True
 
     def tick_ui(self):
