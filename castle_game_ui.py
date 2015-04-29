@@ -1,6 +1,7 @@
 import sys, os
 import pygame
 from pygame.locals import *
+from pygame import ftfont
 
 from castle_game import CastleGameCommand, CastleGameModel
 from castle_game_sprites import *
@@ -22,9 +23,9 @@ class CastleGameUI:
 
     def init_pygame(self):
         pygame.init()
-        pygame.mixer.init()         # for sound
         self.screen_size = (640, 480)
         self.screen = pygame.display.set_mode(self.screen_size)
+        self.font = pygame.ftfont.Font(None, 13)
 
 
     def set_client(self, client):
@@ -55,6 +56,10 @@ class CastleGameUI:
                     self.client.change_state_waiting()
 
         # Drawing
+        self.screen.fill((0, 0, 0))
+        # DEBUG
+        label = self.font.render("Menu state", 1, (255, 255, 255))
+        self.screen.blit(label, (100, 100))
         pygame.display.flip()
 
     def ui_tick_waiting(self):
@@ -66,6 +71,10 @@ class CastleGameUI:
                     self.client.change_state_ready()
 
         # Drawing
+        self.screen.fill((0, 0, 0))
+        # DEBUG
+        label = self.font.render("Waiting state", 1, (255, 255, 255))
+        self.screen.blit(label, (100, 100))
         pygame.display.flip()
 
     def ui_tick_ready(self):
@@ -74,6 +83,10 @@ class CastleGameUI:
             pass
 
         # Drawing
+        self.screen.fill((0, 0, 0))
+        # DEBUG
+        label = self.font.render("Ready state", 1, (255, 255, 255))
+        self.screen.blit(label, (100, 100))
         pygame.display.flip()
 
     # ===================
@@ -103,7 +116,11 @@ class CastleGameUI:
                     self.client.queue_command(cmd)
 
         # Drawing
+        self.screen.fill((0, 0, 0))
         # for sprite in self.sprites:
         #     sprite.draw()
         #
+        # DEBUG
+        label = self.font.render("Game state", 1, (255, 255, 255))
+        self.screen.blit(label, (100, 100))
         pygame.display.flip()
