@@ -24,9 +24,12 @@ class CastleGameUI:
     COLOR_BLACK = (0, 0, 0)
     COLOR_YELLOW = (255, 255, 0)
 
-    def __init__(self):
+    def __init__(self, debug=False):
         # Init pygame
         self.init_pygame()
+
+        global DEBUG
+        DEBUG = debug
 
         # Init other aspects
         self.cursor_x = 0
@@ -45,6 +48,10 @@ class CastleGameUI:
     def set_client(self, client):
         self.client = client
 
+    def exit(self):
+        pygame.quit()
+        self.client.exit()
+
 
     # ===================
     # Starting a new game
@@ -61,13 +68,25 @@ class CastleGameUI:
     # State transitions
     # =================
     def enter_menu(self):
+        self.cursor_x = 0
+        self.cursor_y = 0
+
         play_label = BasicLabel(self, "PLAY", self.COLOR_BLACK, centerx="center", centery=375)
         instr_label = BasicLabel(self, "INSTRUCTIONS", self.COLOR_BLACK, centerx="center", centery=425)
         exit_label = BasicLabel(self, "EXIT", self.COLOR_BLACK, centerx="center", centery=475)
-        self.menu_label_group = pygame.sprite.Group(play_label, instr_label, exit_label)
+
+        self.right_arrow = BasicArrow(self)
+        arrow_pos = [(play_label.rect.left - self.right_arrow.rect.width, play_label.rect.centery),
+                    (instr_label.rect.left - self.right_arrow.rect.width, instr_label.rect.centery),
+                    (exit_label.rect.left - self.right_arrow.rect.width, exit_label.rect.centery)]
+        self.right_arrow.positions = arrow_pos
+        self.menu_label_group = pygame.sprite.Group(self.right_arrow, play_label, instr_label, exit_label)
+
 
     def transition_menu_to_waiting(self):
-        pass
+        self.cursor_x = 0
+        self.cursor_y = 0
+
 
     # ===============================
     # Ticking mechanism
@@ -77,14 +96,32 @@ class CastleGameUI:
         # Process events
         for e in pygame.event.get():
             if e.type == KEYDOWN:
-                if e.key == K_SPACE:
+                if e.key == K_DOWN:
+                    self.cursor_y += 1
+                    if self.cursor_y > 2: self.cursor_y = 2
+                elif e.key == K_UP:
+                    self.cursor_y -= 1
+                    if self.cursor_y < 0: self.cursor_y = 0
+                elif e.key == K_SPACE:
                     # Confirm selection
-                    self.client.change_state_waiting()
+                    if self.cursor_y == 0:
+                        self.client.change_state_waiting()
+                    elif self.cursor_y == 1:
+                        # TODO: instructions
+                        pass
+                    elif self.cursor_y == 2:
+                        self.exit()
+                        return
+
+                if DEBUG:
+                    print "Selection: {0}".format(self.cursor_y)
 
         # Drawing
+        self.right_arrow.update_selection(self.cursor_y)
         self.screen.fill(self.COLOR_WHITE)
         self.menu_label_group.draw(self.screen)
         pygame.display.flip()
+
 
     def ui_tick_waiting(self):
         # Process events
@@ -102,6 +139,7 @@ class CastleGameUI:
         self.screen.blit(ready_label.image, ready_label.rect)
         pygame.display.flip()
 
+
     def ui_tick_ready(self):
         # Process events
         for e in pygame.event.get():
@@ -113,6 +151,7 @@ class CastleGameUI:
         label = self.font.render("Ready state", 1, self.COLOR_BLACK)
         self.screen.blit(label, (100, 100))
         pygame.display.flip()
+
 
     # ===================
     # Actual game ticking

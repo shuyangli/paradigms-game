@@ -13,7 +13,7 @@ if __name__ == '__main__':
     client = CastleClient(args.debug)
     client.set_server(args.server, args.port)
 
-    game_ui = CastleGameUI()
+    game_ui = CastleGameUI(args.debug)
     game_ui.set_client(client)
     client.set_game_gui(game_ui)
 

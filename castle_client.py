@@ -4,7 +4,8 @@ from twisted.internet import reactor
 
 from castle_game import CastleGameCommand, CastleGameModel
 
-import json                     # For serializing dicts
+import json     # For serializing dicts
+import sys      # exit
 
 
 class CastleClientProtocol(Protocol):
@@ -120,6 +121,9 @@ class CastleClient:
         client_protocol_factory = CastleClientProtocolFactory(self)
         reactor.connectTCP(self.server_host, self.server_port, client_protocol_factory)
         reactor.run()
+
+    def exit(self):
+        reactor.stop()
 
     # ==================
     # Game state changes
