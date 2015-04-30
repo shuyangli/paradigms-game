@@ -1,7 +1,7 @@
 import sys, os
 import pygame
 from pygame.locals import *
-from pygame import ftfont
+from pygame import font
 
 from castle_game import CastleGameCommand, CastleGameModel
 from castle_game_sprites import *
@@ -42,7 +42,7 @@ class CastleGameUI:
     def init_pygame(self):
         pygame.init()
         self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
-        self.font = pygame.ftfont.Font(self.FONT_NAME, self.FONT_SIZE)
+        self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
 
 
     def set_client(self, client):
