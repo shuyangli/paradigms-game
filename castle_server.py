@@ -29,12 +29,12 @@ class CastleServerProtocol(Protocol):
             print self.server.player_states
 
     def connectionLost(self, reason):
-        print reason
         if self in self.server.players:
             self.server.players.remove(self)
             self.server.player_states.pop(self, None)
         if DEBUG:
             print "Lost connection from {0}".format(self.transport.getPeer())
+            print "Reason: "reason
 
     def rejectClient(self):
         # rejection: {"type": "error", "info": "game is on"}
