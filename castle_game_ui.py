@@ -14,18 +14,31 @@ class CastleGameUI:
     GAME_FRAMES_PER_LOCK_STEP = 10
     game_frame_id = 0
 
+    # screen size
+    SCREEN_SIZE = (800, 600)
+    FONT_NAME = None
+    FONT_SIZE = 26
+
+    # colors
+    COLOR_WHITE = (255, 255, 255)
+    COLOR_BLACK = (0, 0, 0)
+
     def __init__(self):
         # Init pygame
         self.init_pygame()
 
         # Init other aspects
+        self.cursor_x = 0
+        self.cursor_y = 0
+
+        # Initial state
+        self.enter_menu()
 
 
     def init_pygame(self):
         pygame.init()
-        self.screen_size = (640, 480)
-        self.screen = pygame.display.set_mode(self.screen_size)
-        self.font = pygame.ftfont.Font(None, 26)
+        self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
+        self.font = pygame.ftfont.Font(self.FONT_NAME, self.FONT_SIZE)
 
 
     def set_client(self, client):
@@ -43,6 +56,18 @@ class CastleGameUI:
         self.client.set_game_model(None)
         self.game_model = None
 
+    # =================
+    # State transitions
+    # =================
+    def enter_menu(self):
+        play_label = BasicLabel(self, "PLAY", self.COLOR_BLACK, centerx="center", centery=375)
+        instr_label = BasicLabel(self, "INSTRUCTIONS", self.COLOR_BLACK, centerx="center", centery=425)
+        exit_label = BasicLabel(self, "EXIT", self.COLOR_BLACK, centerx="center", centery=475)
+        self.menu_label_group = pygame.sprite.Group(play_label, instr_label, exit_label)
+
+    def transition_menu_to_waiting(self):
+        pass
+
     # ===============================
     # Ticking mechanism
     # These are called every UI frame
@@ -51,15 +76,13 @@ class CastleGameUI:
         # Process events
         for e in pygame.event.get():
             if e.type == KEYDOWN:
-                # DEBUG
                 if e.key == K_SPACE:
+                    # Confirm selection
                     self.client.change_state_waiting()
 
         # Drawing
-        self.screen.fill((0, 0, 0))
-        # DEBUG
-        label = self.font.render("Menu state", 1, (255, 255, 255))
-        self.screen.blit(label, (100, 100))
+        self.screen.fill(self.COLOR_WHITE)
+        self.menu_label_group.draw(self.screen)
         pygame.display.flip()
 
     def ui_tick_waiting(self):
@@ -71,9 +94,9 @@ class CastleGameUI:
                     self.client.change_state_ready()
 
         # Drawing
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(self.COLOR_WHITE)
         # DEBUG
-        label = self.font.render("Waiting state", 1, (255, 255, 255))
+        label = self.font.render("Waiting state", 1, self.COLOR_WHITE)
         self.screen.blit(label, (100, 100))
         pygame.display.flip()
 
@@ -83,9 +106,9 @@ class CastleGameUI:
             pass
 
         # Drawing
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(self.COLOR_WHITE)
         # DEBUG
-        label = self.font.render("Ready state", 1, (255, 255, 255))
+        label = self.font.render("Ready state", 1, self.COLOR_WHITE)
         self.screen.blit(label, (100, 100))
         pygame.display.flip()
 
@@ -116,11 +139,11 @@ class CastleGameUI:
                     self.client.queue_command(cmd)
 
         # Drawing
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(self.COLOR_WHITE)
         # for sprite in self.sprites:
         #     sprite.draw()
         #
         # DEBUG
-        label = self.font.render("Game state", 1, (255, 255, 255))
+        label = self.font.render("Game state", 1, self.COLOR_WHITE)
         self.screen.blit(label, (100, 100))
         pygame.display.flip()
