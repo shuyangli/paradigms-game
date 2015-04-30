@@ -20,3 +20,12 @@ class BasicLabel(pygame.sprite.Sprite):
                 self.rect.centery = game_ui.screen.get_rect().centery
             else:
                 self.rect.centery = kwargs["centery"]
+
+class Rect(pygame.sprite.Sprite):
+    def __init__(self, color, minx, maxx, miny, maxy):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface([maxx - minx, maxy - miny])
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = (minx + maxx) / 2
+        self.rect.centery = (miny + maxy) / 2

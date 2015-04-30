@@ -22,6 +22,7 @@ class CastleGameUI:
     # colors
     COLOR_WHITE = (255, 255, 255)
     COLOR_BLACK = (0, 0, 0)
+    COLOR_YELLOW = (255, 255, 0)
 
     def __init__(self):
         # Init pygame
@@ -95,9 +96,10 @@ class CastleGameUI:
 
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
-        # DEBUG
-        label = self.font.render("Waiting state", 1, self.COLOR_WHITE)
-        self.screen.blit(label, (100, 100))
+        ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, centerx="center", centery=525)
+        ready_rect = Rect(self.COLOR_YELLOW, 250, 550, 475, 575)
+        self.screen.blit(ready_rect.image, ready_rect.rect)
+        self.screen.blit(ready_label.image, ready_label.rect)
         pygame.display.flip()
 
     def ui_tick_ready(self):
@@ -108,7 +110,7 @@ class CastleGameUI:
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
         # DEBUG
-        label = self.font.render("Ready state", 1, self.COLOR_WHITE)
+        label = self.font.render("Ready state", 1, self.COLOR_BLACK)
         self.screen.blit(label, (100, 100))
         pygame.display.flip()
 
