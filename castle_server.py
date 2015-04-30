@@ -34,7 +34,7 @@ class CastleServerProtocol(Protocol):
             self.server.player_states.pop(self, None)
         if DEBUG:
             print "Lost connection from {0}".format(self.transport.getPeer())
-            print "Reason: "reason
+            print "Reason: ", reason
 
     def rejectClient(self):
         # rejection: {"type": "error", "info": "game is on"}
