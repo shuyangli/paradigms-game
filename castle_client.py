@@ -40,7 +40,7 @@ class CastleClientProtocol(LineReceiver):
         elif ddict["type"] == self.PAYLOAD_TYPE_COMMAND:
             # game command: {"type": "cmd", "lturn": cmd_dict["turn"], "cmd": cmd_dict["command"].serialize()}
             # cmd_dict: {"turn": turn, "command": cmd}
-            cmd_dict = {"turn": int(ddict["lturn"]), "command": CastleGameCommand.decode_command(ddict["cmd"])}
+            cmd_dict = {"turn": ddict["lturn"], "command": CastleGameCommand.decode_command(ddict["cmd"])}
             self.client.receive_game_command(cmd_dict)
 
         elif ddict["type"] == self.PAYLOAD_TYPE_STATE_CHANGE:
@@ -51,7 +51,7 @@ class CastleClientProtocol(LineReceiver):
 
         elif ddict["type"] == self.PAYLOAD_TYPE_ALL_POSITION:
             # all position: {"type": allpos, "ownpos": ownpos, "allpos": [pos]}
-            self.client.receive_pos(int(ddict["ownpos"]), ddict["allpos"])
+            self.client.receive_pos(ddict["ownpos"], ddict["allpos"])
 
     def sendCommandDict(self, cmd_dict):
         # cmd_dict: {"turn": turn, "command": cmd}

@@ -90,7 +90,7 @@ class CastleServerProtocol(LineReceiver):
         elif ddict["type"] == self.PAYLOAD_TYPE_STATE_CHANGE:
             # state change: {"type": "chgstate", "state": state}
             # change state
-            self.server.player_change_state(self, int(ddict["state"]))
+            self.server.player_change_state(self, ddict["state"])
             # if everyone is ready, broadcast game start
             if self.server.is_everyone_ready():
                 # TODO: countdown
@@ -98,8 +98,7 @@ class CastleServerProtocol(LineReceiver):
 
         elif ddict["type"] == self.PAYLOAD_TYPE_SELECT_POSITION:
             # select position: {"type": "selpos", "pos": pos}
-            pos = int(ddict["pos"])
-            if self.server.player_select_position(self, pos):
+            if self.server.player_select_position(self, ddict["pos"]):
                 self.server.broadcast_position()
             else:
                 self.sendPosition()
