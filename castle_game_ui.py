@@ -84,7 +84,11 @@ class CastleGameUI:
         self.right_arrow.positions = arrow_pos
         self.menu_label_group = pygame.sprite.Group(self.right_arrow, play_label, instr_label, exit_label)
 
-        # waiting screen
+
+    def transition_to_waiting(self):
+        self.cursor_x = 0
+        self.cursor_y = 0
+
         # minx, maxx, miny, maxy of the four rectangles for players to choose
         self.player_rect_coord = [ \
                                 [125, 225, 275, 375], \
@@ -96,11 +100,6 @@ class CastleGameUI:
             centerx="center", centery=525)
         self.ready_rect_coord = [250, 550, 475, 575]
         self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
-
-
-    def transition_to_waiting(self):
-        self.cursor_x = 0
-        self.cursor_y = 0
 
 
     # ===============================
