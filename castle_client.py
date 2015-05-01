@@ -1,4 +1,5 @@
 from twisted.internet.protocol import Factory, ClientFactory, Protocol
+from twisted.protocols.basic import LineReceiver
 from twisted.internet.task import LoopingCall   # Let Twisted run main loop
 from twisted.internet import reactor
 
@@ -8,7 +9,7 @@ import json     # For serializing dicts
 import sys      # exit
 
 
-class CastleClientProtocol(Protocol):
+class CastleClientProtocol(LineReceiver):
     PAYLOAD_TYPE_COMMAND = "cmd"
     PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
     PAYLOAD_TYPE_ALL_POSITION = "allpos"
@@ -19,25 +20,22 @@ class CastleClientProtocol(Protocol):
         self.client = client
 
     def connectionMade(self):
-        if DEBUG:
-            print "Connection made with server:{0}".format(self.transport.getPeer())
+        if DEBUG: print "[INFO] Connection made with server:{0}".format(self.transport.getPeer())
         self.client.conn = self
 
     def connectionLost(self, reason):
-        if DEBUG:
-            print "Connection lost from server:{0}".format(self.transport.getPeer())
+        if DEBUG: print "[INFO] Connection lost from server:{0}".format(self.transport.getPeer())
         self.client.conn = None
         # TODO (SL): this should be a fatal error
 
-    def dataReceived(self, data):
+    def lineReceived(self, line):
         # Received a response from the server
-        ddict = json.loads(data)
-        if DEBUG:
-            print ddict
+        ddict = json.loads(line)
+        if DEBUG: self.__logDumpLine(ddict)
 
         if ddict["type"] == self.PAYLOAD_TYPE_ERROR:
             # error: {"type": "error", "info": info}
-            if DEBUG: print ddict
+            pass
 
         elif ddict["type"] == self.PAYLOAD_TYPE_COMMAND:
             # game command: {"type": "cmd", "lturn": cmd_dict["turn"], "cmd": cmd_dict["command"].serialize()}
@@ -56,22 +54,32 @@ class CastleClientProtocol(Protocol):
         final_cmd = {"type": self.PAYLOAD_TYPE_COMMAND,
                      "lturn": cmd_dict["turn"],
                      "cmd": cmd_dict["command"].serialize()}
-        if DEBUG: print final_cmd
-        self.transport.write(json.dumps(final_cmd))
+        payload = json.dumps(final_cmd)
+        if DEBUG: self.__logDumpPayload(final_cmd)
+        self.sendLine(payload)
 
     def sendPosSelection(self, pos):
         # select position: {"type": "selpos", "pos": pos}
         pos_dict = {"type": self.PAYLOAD_TYPE_SELECT_POSITION,
                     "pos": pos}
-        if DEBUG: print pos_dict
-        self.transport.write(json.dumps(pos_dict))
+        payload = json.dumps(pos_dict)
+        if DEBUG: self.__logDumpPayload(pos_dict)
+        self.sendLine(payload)
 
     def sendStateChange(self, state):
         # state change: {"type": "chgstate", "state": state}
         change_dict = {"type": self.PAYLOAD_TYPE_STATE_CHANGE,
                        "state": state}
-        if DEBUG: print change_dict
-        self.transport.write(json.dumps(change_dict))
+        payload = json.dumps(change_dict)
+        if DEBUG: self.__logDumpPayload(change_dict)
+        self.sendLine(payload)
+
+    def __logDumpPayload(self, payload):
+        print "[INFO][SEND] {0}".format(payload)
+
+    def __logDumpLine(self, line):
+        print "[INFO][RECV] {0}".format(line)
+
 
 
 class CastleClientProtocolFactory(ClientFactory):

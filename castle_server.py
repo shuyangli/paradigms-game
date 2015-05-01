@@ -1,4 +1,5 @@
 from twisted.internet.protocol import Factory, Protocol
+from twisted.protocols.basic import LineReceiver
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet import reactor
 
@@ -7,7 +8,7 @@ from castle_game import CastleGameCommand, CastleGameModel
 import json
 
 
-class CastleServerProtocol(Protocol):
+class CastleServerProtocol(LineReceiver):
     PAYLOAD_TYPE_COMMAND = "cmd"
     PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
     PAYLOAD_TYPE_ALL_POSITION = "allpos"
@@ -27,22 +28,20 @@ class CastleServerProtocol(Protocol):
         self.server.player_states[self] = self.server.GAME_STATE_MENU
 
         if DEBUG:
-            print "New connection from {0}".format(self.transport.getPeer())
-            print "Player states: {0}".format(self.server.player_states)
+            print "[INFO] New connection from {0}".format(self.transport.getPeer())
+            print "[INFO] Player states: {0}".format(self.server.player_states)
 
     def connectionLost(self, reason):
-        if self in self.server.players:
-            self.server.players.remove(self)
-            self.server.player_states.pop(self, None)
+        self.server.purge_player(self)
         if DEBUG:
-            print "Lost connection from {0}".format(self.transport.getPeer())
-            print "Reason: {0}".format(reason)
+            print "[INFO] Lost connection from {0}".format(self.transport.getPeer())
+            print "[INFO] Reason: {0}".format(reason)
 
     def __logDumpPayload(self, payload):
-        print "[INFO] To {0}: {1}".format(self.transport.getPeer(), payload)
+        print "[INFO][SEND] To {0}: {1}".format(self.transport.getPeer(), payload)
 
-    def __logDumpData(self, data):
-        print "[INFO] From {0}: {1}".format(self.transport.getPeer(), data)
+    def __logDumpLine(self, line):
+        print "[INFO][RECV] From {0}: {1}".format(self.transport.getPeer(), line)
 
     # ==============
     # Active actions
@@ -51,8 +50,8 @@ class CastleServerProtocol(Protocol):
         # rejection: {"type": "error", "info": "game is on"}
         ddict = {"type": self.PAYLOAD_TYPE_ERROR, "info": "Game is currently on"}
         payload = json.dumps(ddict)
-        if DEBUG: self.__logDumpPayload(payload)
-        self.transport.write(payload)
+        if DEBUG: self.__logDumpPayload(ddict)
+        self.sendLine(payload)
         self.transport.loseConnection()
 
     def sendPosition(self):
@@ -66,23 +65,23 @@ class CastleServerProtocol(Protocol):
                         "ownpos": own_position,
                         "allpos": all_positions}
         payload = json.dumps(payload_dict)
-        if DEBUG: self.__logDumpPayload(payload)
-        self.transport.write(payload)
+        if DEBUG: self.__logDumpPayload(payload_dict)
+        self.sendLine(payload)
 
     def sendState(self, state):
         payload_dict = {"type": self.PAYLOAD_TYPE_STATE_CHANGE, "state": state}
         payload = json.dumps(payload_dict)
-        if DEBUG: self.__logDumpPayload(payload)
-        self.transport.write(payload)
+        if DEBUG: self.__logDumpPayload(payload_dict)
+        self.sendLine(payload)
 
     # ==============================
-    # Passive action (data received)
+    # Passive action (line received)
     # ==============================
-    def dataReceived(self, data):
+    def lineReceived(self, line):
         # Receive a command from the client
-        if DEBUG: self.__logDumpData(data)
+        ddict = json.loads(line)
+        if DEBUG: self.__logDumpLine(ddict)
 
-        ddict = json.loads(data)
         if ddict["type"] == self.PAYLOAD_TYPE_COMMAND:
             # game command: {"type": "cmd", "lturn": cmd_dict["turn"], "cmd": cmd_dict["command"].serialize()}
             # broadcast command
@@ -149,6 +148,15 @@ class CastleServer:
         else:
             return False
 
+    def purge_player(self, player):
+        if player in self.players:
+            self.players.remove(player)
+            self.player_states.pop(player, None)
+            if player in self.player_pos:
+                original_pos = self.player_pos.index(player)
+                self.player_pos[original_pos] = None
+                self.broadcast_position()
+
     def __logDumpPayload(self, payload):
         print "[INFO] Broadcast msg: {0}".format(payload)
 
@@ -187,10 +195,10 @@ class CastleServer:
 
     def broadcast_command(self, origin_protocol, cmd_dict):
         payload = json.dumps(cmd_dict)
-        if DEBUG: self.__logDumpPayload(payload)
+        if DEBUG: self.__logDumpPayload(cmd_dict)
         dests = [x for x in self.players if x != origin_protocol]
         for d in dests:
-            d.transport.write(payload)
+            d.sendLine(payload)
 
     def broadcast_position(self):
         waiting_players = [x for x in self.players if self.player_states[x] == self.GAME_STATE_WAITING or self.player_states[x] == self.GAME_STATE_READY]
