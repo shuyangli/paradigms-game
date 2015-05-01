@@ -23,6 +23,8 @@ class CastleGameUI:
     COLOR_WHITE = (255, 255, 255)
     COLOR_BLACK = (0, 0, 0)
     COLOR_YELLOW = (255, 255, 0)
+    COLOR_GREEN = (0, 255, 0)
+    COLOR_RED = (255, 0, 0)
 
     def __init__(self, debug=False):
         # Init pygame
@@ -82,6 +84,19 @@ class CastleGameUI:
         self.right_arrow.positions = arrow_pos
         self.menu_label_group = pygame.sprite.Group(self.right_arrow, play_label, instr_label, exit_label)
 
+        # waiting screen
+        # minx, maxx, miny, maxy of the four rectangles for players to choose
+        self.player_rect_coord = [ \
+                                [125, 225, 275, 375], \
+                                [275, 375, 275, 375], \
+                                [425, 525, 275, 375], \
+                                [575, 675, 275, 375] \
+                                 ]
+        self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, \
+            centerx="center", centery=525)
+        self.ready_rect_coord = [250, 550, 475, 575]
+        self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
+
 
     def transition_menu_to_waiting(self):
         self.cursor_x = 0
@@ -122,21 +137,49 @@ class CastleGameUI:
         self.menu_label_group.draw(self.screen)
         pygame.display.flip()
 
+    def draw_obj_group(self, obj_group):
+        for obj in obj_group:
+            self.screen.blit(obj.image, obj.rect)
+
+    # get the coordinates of the encompassing rectangle
+    # that is width wider on each side
+    def border_coord(self, coord, width): # coord: [minx, maxx, miny, maxy]
+        return [coord[0] - width, \
+                coord[1] + width, \
+                coord[2] - width, \
+                coord[3] + width]
 
     def ui_tick_waiting(self):
         # Process events
         for e in pygame.event.get():
             if e.type == KEYDOWN:
-                # DEBUG
-                if e.key == K_SPACE:
-                    self.client.change_state_ready()
-
+                if e.key == K_DOWN or e.key == K_UP:
+                    self.cursor_y = 1 - self.cursor_y
+                elif e.key == K_LEFT:
+                    if self.cursor_y == 0:
+                        self.cursor_x = (self.cursor_x - 1) % 4
+                elif e.key == K_RIGHT:
+                    if self.cursor_y == 0:
+                        self.cursor_x = (self.cursor_x + 1) % 4
+                elif e.key == K_SPACE:
+                    if self.cursor_y == 1:
+                        self.client.change_state_ready()
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
-        ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, centerx="center", centery=525)
-        ready_rect = Rect(self.COLOR_YELLOW, 250, 550, 475, 575)
-        self.screen.blit(ready_rect.image, ready_rect.rect)
-        self.screen.blit(ready_label.image, ready_label.rect)
+        waiting_obj_group = []
+        for i in xrange(4):
+            if self.cursor_y == 0 and self.cursor_x == i:
+                select_rect = Rect(self.COLOR_RED, \
+                    self.border_coord(self.player_rect_coord[i], 5))
+                waiting_obj_group.append(select_rect)
+            player_rect = Rect(self.COLOR_GREEN, self.player_rect_coord[i])
+            waiting_obj_group.append(player_rect)
+        if self.cursor_y == 1:
+            select_rect = Rect(self.COLOR_RED, \
+                self.border_coord(self.ready_rect_coord, 5))
+            waiting_obj_group.append(select_rect)
+        waiting_obj_group.extend([self.ready_rect, self.ready_label])
+        self.draw_obj_group(waiting_obj_group)
         pygame.display.flip()
 
 

@@ -24,13 +24,13 @@ class BasicLabel(pygame.sprite.Sprite):
 
 
 class Rect(pygame.sprite.Sprite):
-    def __init__(self, color, minx, maxx, miny, maxy):
+    def __init__(self, color, coord): # coord: (minx, maxx, miny, maxy)
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface([maxx - minx, maxy - miny])
+        self.image = pygame.Surface([coord[1] - coord[0], coord[3] - coord[2]])
         self.image.fill(color)
         self.rect = self.image.get_rect()
-        self.rect.centerx = (minx + maxx) / 2
-        self.rect.centery = (miny + maxy) / 2
+        self.rect.centerx = (coord[0] + coord[1]) / 2
+        self.rect.centery = (coord[2] + coord[3]) / 2
 
 
 class BasicArrow(pygame.sprite.Sprite):
