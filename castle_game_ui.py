@@ -23,7 +23,7 @@ class CastleGameUI:
     COLOR_WHITE = (255, 255, 255)
     COLOR_BLACK = (0, 0, 0)
     COLOR_YELLOW = (255, 255, 0)
-    COLOR_GREEN = (0, 255, 0)
+    COLOR_GREEN = (0, 255, 0, 0.1)
     COLOR_RED = (255, 0, 0)
 
     def __init__(self, debug=False):
@@ -90,13 +90,13 @@ class CastleGameUI:
         self.cursor_y = 0
 
         # minx, maxx, miny, maxy of the four rectangles for players to choose
-        self.player_rect_coord = [ \
-                                [125, 225, 275, 375], \
-                                [275, 375, 275, 375], \
-                                [425, 525, 275, 375], \
-                                [575, 675, 275, 375] \
+        self.player_rect_coord = [ 
+                                [125, 225, 275, 375], 
+                                [275, 375, 275, 375], 
+                                [425, 525, 275, 375], 
+                                [575, 675, 275, 375] 
                                  ]
-        self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, \
+        self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, 
             centerx="center", centery=525)
         self.ready_rect_coord = [250, 550, 475, 575]
         self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
@@ -138,14 +138,18 @@ class CastleGameUI:
 
     def draw_obj_group(self, obj_group):
         for obj in obj_group:
-            self.screen.blit(obj.image, obj.rect)
+            if hasattr(obj, "images"):
+                for subobj in obj.images:
+                    self.screen.blit(subobj[0], subobj[1])
+            else:
+                self.screen.blit(obj.image, obj.rect)
 
     # get the coordinates of the encompassing rectangle
     # that is width wider on each side
     def border_coord(self, coord, width): # coord: [minx, maxx, miny, maxy]
-        return [coord[0] - width, \
-                coord[1] + width, \
-                coord[2] - width, \
+        return [coord[0] - width, 
+                coord[1] + width, 
+                coord[2] - width, 
                 coord[3] + width]
 
     def ui_tick_waiting(self):
@@ -168,15 +172,13 @@ class CastleGameUI:
         waiting_obj_group = []
         for i in xrange(4):
             if self.cursor_y == 0 and self.cursor_x == i:
-                select_rect = Rect(self.COLOR_RED, \
-                    self.border_coord(self.player_rect_coord[i], 5))
-                waiting_obj_group.append(select_rect)
+                cursor = Cursor(self.COLOR_RED, self.player_rect_coord[i], 5)
+                waiting_obj_group.append(cursor)
             player_rect = Rect(self.COLOR_GREEN, self.player_rect_coord[i])
             waiting_obj_group.append(player_rect)
         if self.cursor_y == 1:
-            select_rect = Rect(self.COLOR_RED, \
-                self.border_coord(self.ready_rect_coord, 5))
-            waiting_obj_group.append(select_rect)
+            cursor = Cursor(self.COLOR_RED, self.ready_rect_coord, 5)
+            waiting_obj_group.append(cursor)
         waiting_obj_group.extend([self.ready_rect, self.ready_label])
         self.draw_obj_group(waiting_obj_group)
         pygame.display.flip()

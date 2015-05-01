@@ -35,6 +35,38 @@ class Rect(pygame.sprite.Sprite):
         self.rect.centerx = (coord[0] + coord[1]) / 2
         self.rect.centery = (coord[2] + coord[3]) / 2
 
+class Cursor(pygame.sprite.Sprite):
+    def __init__(self, color, coord, width): 
+        pygame.sprite.Sprite.__init__(self)
+        minx = coord[0]
+        maxx = coord[1]
+        miny = coord[2]
+        maxy = coord[3]
+        cursor_width = maxx - minx
+        cursor_height = maxy - miny
+        cursor_coverage = 0.25 # the percentage of each size that the cursor covers  
+        cursor_cover_width = cursor_coverage * cursor_width
+        cursor_cover_height = cursor_coverage * cursor_height
+        rect_coords = [
+                        [minx - width, minx, miny - width, miny + cursor_coverage * cursor_height],
+                        [minx, minx + cursor_cover_width, miny - width, miny],
+                        [maxx - cursor_cover_width, maxx + width, miny - width, miny],
+                        [maxx, maxx + width, miny, miny + cursor_coverage * cursor_height],
+                        [maxx, maxx + width, maxy - cursor_coverage * cursor_height, maxy + width],
+                        [maxx - cursor_cover_width, maxx, maxy, maxy + width],
+                        [minx - width, minx + cursor_cover_width, maxy, maxy + width],
+                        [minx - width, minx, maxy - cursor_coverage * cursor_height, maxy]
+                      ]
+        self.images = []
+        for rect_coord in rect_coords:
+            w = int(round(rect_coord[1] - rect_coord[0]))
+            h = int(round(rect_coord[3] - rect_coord[2]))
+            new_image = pygame.Surface([w, h])
+            new_image.fill(color)
+            new_rect = new_image.get_rect()
+            new_rect.centerx = (rect_coord[0] + rect_coord[1]) / 2
+            new_rect.centery = (rect_coord[2] + rect_coord[3]) / 2
+            self.images.append([new_image, new_rect])
 
 class BasicArrow(pygame.sprite.Sprite):
     def __init__(self, game_ui, positions=None):
