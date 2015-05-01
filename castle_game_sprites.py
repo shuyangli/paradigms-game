@@ -1,6 +1,9 @@
 import pygame
 from pygame.locals import *
 
+# ===========
+# UI elements
+# ===========
 class BasicLabel(pygame.sprite.Sprite):
     def __init__(self, game_ui, text, color, antialias=True, **kwargs):
         # kwargs: centerx, ypos
@@ -45,7 +48,16 @@ class BasicArrow(pygame.sprite.Sprite):
         self.rect.x = self.positions[selection][0]
         self.rect.centery = self.positions[selection][1]
 
+
+class SelectionBox(pygame.sprite.Sprite):
+    def __init__(self, game_ui):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((0, 0)) # default surface
+        self.rect = self.image.get_rect()
+
+# =======================
 # Sprites for actual game
+# =======================
 class EmptySquare(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
