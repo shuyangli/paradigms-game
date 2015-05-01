@@ -1,7 +1,7 @@
 from twisted.internet.protocol import Factory, ClientFactory, Protocol
 from twisted.protocols.basic import LineReceiver
 from twisted.internet.task import LoopingCall   # Let Twisted run main loop
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 
 from castle_game import CastleGameCommand, CastleGameModel
 
@@ -167,6 +167,7 @@ class CastleClient:
     # ==========================
     def select_pos(self, pos):
         self.conn.sendPosSelection(pos)
+
 
     def receive_pos(self, ownpos, allpos):
         self.own_position = ownpos

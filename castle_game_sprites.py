@@ -96,7 +96,7 @@ class EmptySquare(pygame.sprite.Sprite):
 
 
 class Castle(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, body_color, door_color, coord):
         pygame.sprite.Sprite.__init__(self)
 
 
