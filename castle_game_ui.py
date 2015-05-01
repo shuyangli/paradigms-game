@@ -98,7 +98,7 @@ class CastleGameUI:
         self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
 
 
-    def transition_menu_to_waiting(self):
+    def transition_to_waiting(self):
         self.cursor_x = 0
         self.cursor_y = 0
 

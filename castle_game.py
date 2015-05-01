@@ -1,3 +1,5 @@
+from castle_game_sprites import *
+
 class CastleGameCommand:
     """Wrapper class for game commands and command deserializer."""
     CMD_SEPARATOR = "#"
@@ -6,11 +8,21 @@ class CastleGameCommand:
         HOUSE = "h"
         TOWER = "t"
         MARKET = "m"
+        NAME_TO_CLS = {
+            "h": House,
+            "t": Tower,
+            "m": Market
+        }
 
         def __init__(self, building, x, y):
             self.building = building
             self.x = x
             self.y = y
+
+        def apply_to(self, game):
+            if game.board[self.y][self.x] == game.empty_square:
+                # build
+                game_board[self.y][self.x] = self.NAME_TO_CLS[self.building]()
 
         def serialize(self):
             return "B{0}{1}{2}{3}{4}{5}".format(
@@ -32,6 +44,10 @@ class CastleGameCommand:
         def __init__(self, x, y):
             self.x = x
             self.y = y
+
+        def apply_to(self, game):
+            # destroy
+            game.board[self.y][self.x] = game.empty_square
 
         def serialize(self):
             return "D{0}{1}{2}{3}".format(
@@ -68,10 +84,33 @@ class CastleGameCommand:
             raise ValueError("Unknown encoded command: {0}".format(encoded))
 
 
+class CastleGamePlayerModel:
+    """Castle game player class."""
+    # Castle position
+    POS_TOP_LEFT = (0, 0)
+    POS_TOP_RIGHT = (0, 6)
+    POS_BTM_LEFT = (6, 0)
+    POS_BTM_RIGHT = (6, 6)
+
+    # Default value
+    INIT_MONEY = 0
+    INIT_INCREMENT = 5
+
+    def __init__(self):
+        # TODO: clean this up
+        self.money = self.INIT_MONEY
+        self.castle = Castle()
+        self.buildings = []
+        self.army = []
+        self.money_increment = self.INIT_INCREMENT
+
+
 class CastleGameModel:
     """Castle game model class. This class represents the game state."""
-    def __init__(self):
-        pass
+    DEFAULT_WIDTH = 7
+    DEFAULT_HEIGHT = 7
 
-    def apply_command(self, cmd):
-        pass
+    def __init__(self, width=7, height=7):
+        self.empty_square = EmptySquare()
+        self.board = [[self.empty_square] * width] * height
+        self.player_models = []

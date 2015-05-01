@@ -129,6 +129,7 @@ class CastleClient:
     # Game state changes
     # ==================
     def change_state_waiting(self):
+        self.game_ui.transition_to_waiting()
         self.current_state = self.GAME_STATE_WAITING
         self.conn.sendStateChange(self.current_state)
 
@@ -172,7 +173,7 @@ class CastleClient:
             print self.lock_step_id
 
         for cmd in self.ready_commands:
-            self.game_model.apply_command(cmd)
+            cmd.apply_to(self.game_model)
             self.pending_commands.remove(cmd)
 
         return True
