@@ -169,7 +169,6 @@ class CastleClient:
     def select_pos(self, pos):
         self.conn.sendPosSelection(pos)
 
-
     def receive_pos(self, ownpos, allpos):
         self.own_position = ownpos
         self.taken_positions = allpos

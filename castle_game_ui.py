@@ -188,12 +188,13 @@ class CastleGameUI:
                 self.player_rect_colors[i] = self.COLOR_GREEN
 
     # TODO:
-    # Nothing selected, ready is grey, cursor don't move down
-    # Once selected, ready turns yellow, cursor can move down
-    # Once ready, ready disappears and becomes "waiting for opponents"
+    # solve the bug where both sides are waiting
     def ui_tick_waiting(self):
         # Process events
         if not self.isReady:
+            if not self.selectionMade and self.client.own_position != None:
+                self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
+                self.selectionMade = True
             for e in pygame.event.get():
                 if e.type == KEYDOWN:
                     if e.key == K_DOWN or e.key == K_UP:
@@ -208,13 +209,10 @@ class CastleGameUI:
                     elif e.key == K_SPACE:
                         if self.cursor_y == 0:
                             self.client.select_pos(self.cursor_x)
-                            if not self.selectionMade and self.client.own_position != None:
-                                    self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
-                                    self.selectionMade = True
                         elif self.cursor_y == 1:
                             if not self.isReady:
                                 self.isReady = True
-                            # self.client.change_state_ready()
+                                #self.client.change_state_ready()
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
         self.update_player_rect_colors()
