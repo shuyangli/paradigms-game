@@ -155,6 +155,7 @@ class CastleClient:
         self.conn.sendStateChange(self.current_state)
 
     def change_state_start_game(self):
+        self.game_model.prepare_game(self)
         self.current_state = self.GAME_STATE_PLAYING
         self.conn.sendStateChange(self.current_state)
 
@@ -197,12 +198,15 @@ class CastleClient:
         # Called every lock step (~10 fps), simulate actual game
         # Check if it's ready first, and return false if it's not ready to advance
         self.lock_step_id += 1
-        if DEBUG:
-            print "Lockstep {0}".format(self.lock_step_id)
+        if DEBUG: print "[INFO][TICK] {0}".format(self.lock_step_id)
 
         for cmd in self.ready_commands:
-            cmd.apply_to(self.game_model)
+            if DEBUG: print "[INFO][CMD] {0}".format(cmd)
+            cmd["command"].apply_to(self.game_model)
             self.pending_commands.remove(cmd)
+
+        # tick lock step for model
+        self.game_model.tick_lock_step()
 
         return True
 

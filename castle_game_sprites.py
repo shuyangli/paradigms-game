@@ -36,7 +36,7 @@ class Rect(pygame.sprite.Sprite):
         self.rect.centery = (coord[2] + coord[3]) / 2
 
 class Cursor(pygame.sprite.Sprite):
-    def __init__(self, color, coord, width): 
+    def __init__(self, color, coord, width):
         pygame.sprite.Sprite.__init__(self)
         minx = coord[0]
         maxx = coord[1]
@@ -44,7 +44,7 @@ class Cursor(pygame.sprite.Sprite):
         maxy = coord[3]
         cursor_width = maxx - minx
         cursor_height = maxy - miny
-        cursor_coverage = 0.25 # the percentage of each size that the cursor covers  
+        cursor_coverage = 0.25 # the percentage of each size that the cursor covers
         cursor_cover_width = cursor_coverage * cursor_width
         cursor_cover_height = cursor_coverage * cursor_height
         rect_coords = [
@@ -90,6 +90,8 @@ class SelectionBox(pygame.sprite.Sprite):
 # =======================
 # Sprites for actual game
 # =======================
+GAME_FRAMES_PER_LOCK_STEP = 10
+
 class EmptySquare(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -101,15 +103,152 @@ class Castle(pygame.sprite.Sprite):
 
 
 class House(pygame.sprite.Sprite):
-    def __init__(self):
+    STATE_BUILDING = 0
+    STATE_READY = 1
+    STATE_COOLDOWN = 2
+
+    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_COOLDOWN_TO_READY = 3 * GAME_FRAMES_PER_LOCK_STEP
+    step_count = 0
+
+    def __init__(self, game_model, game_player):
         pygame.sprite.Sprite.__init__(self)
+        self.game_model = game_model
+        self.game_player = game_player
+        self.state = self.STATE_BUILDING
+
+    # =================
+    # Ticking mechanism
+    # =================
+    def update(self):
+        # called every ui frame for animation
+        # update image
+        pass
+
+    def tick_lock_step(self):
+        # called every lockstep for game logic
+        if self.state == self.STATE_BUILDING:
+            # count states
+            if self.step_count == self.COUNT_BUILDING_TO_READY:
+                # transition
+                self.step_count = 0
+                self.state = self.STATE_READY
+
+        elif self.state == self.STATE_READY:
+            self.train_soldier()
+
+            # transition
+            self.step_count = 0
+            self.state = self.STATE_COOLDOWN
+
+        elif self.state == self.STATE_COOLDOWN:
+            # count states
+            self.step_count += 1
+            if self.step_count == self.COUNT_COOLDOWN_TO_READY:
+                # transition
+                self.step_count = 0
+                self.state = self.STATE_READY
+
+    # ======
+    # Events
+    # ======
+    def train_soldier(self):
+        pass
+
+    def destroyed(self):
+        pass
+
 
 
 class Tower(pygame.sprite.Sprite):
-    def __init__(self):
+    STATE_BUILDING = 0
+    STATE_READY = 1
+    STATE_COOLDOWN = 2
+
+    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    step_count = 0
+
+    def __init__(self, game_model, game_player):
         pygame.sprite.Sprite.__init__(self)
+        self.game_model = game_model
+        self.game_player = game_player
+        self.state = self.STATE_BUILDING
+
+    # =================
+    # Ticking mechanism
+    # =================
+    def update(self):
+        # called every ui frame for animation
+        # update image
+        pass
+
+    def tick_lock_step(self):
+        # called every lockstep for game logic
+        if self.state == self.STATE_BUILDING:
+            # count states
+            if self.step_count == self.COUNT_BUILDING_TO_READY:
+                # transition
+                self.step_count = 0
+                self.state = self.STATE_READY
+
+        elif self.state == self.STATE_READY:
+            if self.attack():
+                # transition
+                self.step_count = 0
+                self.state = self.STATE_COOLDOWN
+
+        elif self.state == self.STATE_COOLDOWN:
+            # count states
+            self.step_count += 1
+            if self.step_count == self.COUNT_COOLDOWN_TO_READY:
+                # transition
+                self.step_count = 0
+                self.state = self.STATE_READY
+
+    # ======
+    # Events
+    # ======
+    def attack(self):
+        # TODO
+        return False
+
+    def destroyed(self):
+        pass
 
 
 class Market(pygame.sprite.Sprite):
-    def __init__(self):
+    STATE_BUILDING = 0
+    STATE_READY = 1
+
+    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    step_count = 0
+
+    MONEY_INCREMENT = 5
+
+    def __init__(self, game_model, game_player):
         pygame.sprite.Sprite.__init__(self)
+        self.game_model = game_model
+        self.game_player = game_player
+        self.state = self.STATE_BUILDING
+
+    # =================
+    # Ticking mechanism
+    # =================
+    def update(self):
+        # called every ui frame for animation
+        # update image
+        pass
+
+    def tick_lock_step(self):
+        # called every lockstep for game logic
+        if self.state == self.STATE_BUILDING:
+            # count states
+            if self.step_count == self.COUNT_BUILDING_TO_READY:
+                # transition
+                self.step_count = 0
+                self.state = self.STATE_READY
+                self.game_player.money_increment += self.MONEY_INCREMENT
+
+    def destroyed(self):
+        self.game_player.money_increment -= self.MONEY_INCREMENT

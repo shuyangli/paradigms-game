@@ -20,6 +20,9 @@ class CastleGameCommand:
             self.y = y
 
         def apply_to(self, game):
+            # TODO
+            print "[TODO] Build's apply_to called"
+            return
             if game.board[self.y][self.x] == game.empty_square:
                 # build
                 game_board[self.y][self.x] = self.NAME_TO_CLS[self.building]()
@@ -46,6 +49,9 @@ class CastleGameCommand:
             self.y = y
 
         def apply_to(self, game):
+            # TODO
+            print "[TODO] Destroy's apply_to called"
+            return
             # destroy
             game.board[self.y][self.x] = game.empty_square
 
@@ -93,24 +99,62 @@ class CastleGamePlayerModel:
     POS_BTM_RIGHT = (6, 6)
 
     # Default value
-    INIT_MONEY = 0
-    INIT_INCREMENT = 5
+    INITIAL_MONEY = 0
+    INITIAL_MONEY_INCREMENT = 5
+
+    GAME_FRAMES_PER_LOCK_STEP = 10
+    step_count = 0
 
     def __init__(self):
         # TODO: clean this up
-        self.money = self.INIT_MONEY
+        self.money = self.INITIAL_MONEY
         self.castle = Castle()
-        self.buildings = []
-        self.army = []
-        self.money_increment = self.INIT_INCREMENT
+        self.buildings = []     # [buildings]
+        self.army = []          # [soldiers]
+        self.money_increment = self.INITIAL_MONEY_INCREMENT
+
+    # =================
+    # Ticking mechanism
+    # =================
+    def update(self):
+        for building in self.buildings:
+            building.update()
+        for soldier in self.army:
+            soldier.update()
+
+    def tick_lock_step(self):
+        self.step_count += 1
+
+        if self.step_count >= self.GAME_FRAMES_PER_LOCK_STEP:
+            # update every second
+            self.step_count = 0
+            self.money += self.money_increment
+
+        for building in self.buildings:
+            building.tick_lock_step()
+        for soldier in self.army:
+            soldier.tick_lock_step()
 
 
 class CastleGameModel:
     """Castle game model class. This class represents the game state."""
-    DEFAULT_WIDTH = 7
-    DEFAULT_HEIGHT = 7
+    WIDTH = 8
+    HEIGHT = 8
 
-    def __init__(self, width=7, height=7):
+    def __init__(self):
         self.empty_square = EmptySquare()
-        self.board = [[self.empty_square] * width] * height
+        self.board = [[self.empty_square] * self.WIDTH] * self.HEIGHT
         self.player_models = []
+
+    def prepare_game(self, client):
+        pass
+
+    def update(self):
+        # called every ui frame
+        for player in self.player_models:
+            player.update()
+
+    def tick_lock_step(self):
+        # called every lockstep
+        for player in self.player_models:
+            player.tick_lock_step()

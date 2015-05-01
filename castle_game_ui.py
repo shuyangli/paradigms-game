@@ -275,6 +275,9 @@ class CastleGameUI:
                     cmd = CastleGameCommand.Build(CastleGameCommand.Build.HOUSE, 0, 0)
                     self.client.queue_command(cmd)
 
+        # Ticking
+        self.game_model.update()
+
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
         # for sprite in self.sprites:
