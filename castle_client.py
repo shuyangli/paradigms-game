@@ -11,7 +11,9 @@ import sys      # exit
 class CastleClientProtocol(Protocol):
     PAYLOAD_TYPE_COMMAND = "cmd"
     PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
-    FAYLOAD_TYPE_ERROR = "error"
+    PAYLOAD_TYPE_ALL_POSITION = "allpos"
+    PAYLOAD_TYPE_SELECT_POSITION = "selpos"
+    PAYLOAD_TYPE_ERROR = "error"
 
     def __init__(self, client):
         self.client = client
@@ -33,7 +35,7 @@ class CastleClientProtocol(Protocol):
         if DEBUG:
             print ddict
 
-        if ddict["type"] == self.FAYLOAD_TYPE_ERROR:
+        if ddict["type"] == self.PAYLOAD_TYPE_ERROR:
             # error: {"type": "error", "info": info}
             if DEBUG: print ddict
 
@@ -48,27 +50,27 @@ class CastleClientProtocol(Protocol):
             if ddict["state"] == self.client.GAME_STATE_PLAYING:
                 self.client.change_state_start_game()
 
-
     def sendCommandDict(self, cmd_dict):
         # cmd_dict: {"turn": turn, "command": cmd}
         # final dict: {"type": "cmd", "lturn": cmd_dict["turn"], "cmd": cmd_dict["command"].serialize()}
-        final_cmd = {
-            "type": self.PAYLOAD_TYPE_COMMAND,
-            "lturn": cmd_dict["turn"],
-            "cmd": cmd_dict["command"].serialize()
-        }
-        if DEBUG:
-            print final_cmd
+        final_cmd = {"type": self.PAYLOAD_TYPE_COMMAND,
+                     "lturn": cmd_dict["turn"],
+                     "cmd": cmd_dict["command"].serialize()}
+        if DEBUG: print final_cmd
         self.transport.write(json.dumps(final_cmd))
+
+    def sendPosSelection(self, pos):
+        # select position: {"type": "selpos", "pos": pos}
+        pos_dict = {"type": self.PAYLOAD_TYPE_SELECT_POSITION,
+                    "pos": pos}
+        if DEBUG: print pos_dict
+        self.transport.write(json.dumps(pos_dict))
 
     def sendStateChange(self, state):
         # state change: {"type": "chgstate", "state": state}
-        change_dict = {
-            "type": self.PAYLOAD_TYPE_STATE_CHANGE,
-            "state": state
-        }
-        if DEBUG:
-            print change_dict
+        change_dict = {"type": self.PAYLOAD_TYPE_STATE_CHANGE,
+                       "state": state}
+        if DEBUG: print change_dict
         self.transport.write(json.dumps(change_dict))
 
 
@@ -129,6 +131,7 @@ class CastleClient:
     # Game state changes
     # ==================
     def change_state_waiting(self):
+        self.selected_player_pos = None
         self.game_ui.transition_to_waiting()
         self.current_state = self.GAME_STATE_WAITING
         self.conn.sendStateChange(self.current_state)
@@ -144,6 +147,12 @@ class CastleClient:
     def change_state_end_game(self):
         self.current_state = self.GAME_STATE_MENU
         self.conn.sendStateChange(self.current_state)
+
+    # ==========================
+    # Meta game command handling
+    # ==========================
+    def select_pos(self, pos):
+        self.conn.sendPosSelection(pos)
 
     # =====================
     # Game command handling
@@ -170,7 +179,7 @@ class CastleClient:
         # Check if it's ready first, and return false if it's not ready to advance
         self.lock_step_id += 1
         if DEBUG:
-            print self.lock_step_id
+            print "Lockstep {0}".format(self.lock_step_id)
 
         for cmd in self.ready_commands:
             cmd.apply_to(self.game_model)

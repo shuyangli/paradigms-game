@@ -38,7 +38,7 @@ class CastleGameUI:
         self.cursor_y = 0
 
         # Initial state
-        self.enter_menu()
+        self.transition_to_menu()
 
 
     def init_pygame(self):
@@ -69,7 +69,7 @@ class CastleGameUI:
     # =================
     # State transitions
     # =================
-    def enter_menu(self):
+    def transition_to_menu(self):
         self.cursor_x = 0
         self.cursor_y = 0
 
@@ -90,14 +90,11 @@ class CastleGameUI:
         self.cursor_y = 0
 
         # minx, maxx, miny, maxy of the four rectangles for players to choose
-        self.player_rect_coord = [ 
-                                [125, 225, 275, 375], 
-                                [275, 375, 275, 375], 
-                                [425, 525, 275, 375], 
-                                [575, 675, 275, 375] 
-                                 ]
-        self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, 
-            centerx="center", centery=525)
+        self.player_rect_coord = [[125, 225, 275, 375],
+                                [275, 375, 275, 375],
+                                [425, 525, 275, 375],
+                                [575, 675, 275, 375]]
+        self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, centerx="center", centery=525)
         self.ready_rect_coord = [250, 550, 475, 575]
         self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
 
@@ -147,9 +144,9 @@ class CastleGameUI:
     # get the coordinates of the encompassing rectangle
     # that is width wider on each side
     def border_coord(self, coord, width): # coord: [minx, maxx, miny, maxy]
-        return [coord[0] - width, 
-                coord[1] + width, 
-                coord[2] - width, 
+        return [coord[0] - width,
+                coord[1] + width,
+                coord[2] - width,
                 coord[3] + width]
 
     def ui_tick_waiting(self):
@@ -165,7 +162,9 @@ class CastleGameUI:
                     if self.cursor_y == 0:
                         self.cursor_x = (self.cursor_x + 1) % 4
                 elif e.key == K_SPACE:
-                    if self.cursor_y == 1:
+                    if self.cursor_y == 0:
+                        self.client.select_pos(self.cursor_x)
+                    elif self.cursor_y == 1:
                         self.client.change_state_ready()
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
@@ -229,6 +228,6 @@ class CastleGameUI:
         #     sprite.draw()
         #
         # DEBUG
-        label = self.font.render("Game state", 1, self.COLOR_WHITE)
+        label = self.font.render("Game state", 1, self.COLOR_BLACK)
         self.screen.blit(label, (100, 100))
         pygame.display.flip()
