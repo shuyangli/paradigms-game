@@ -42,11 +42,16 @@ class CastleClientProtocol(LineReceiver):
             # cmd_dict: {"turn": turn, "command": cmd}
             cmd_dict = {"turn": int(ddict["lturn"]), "command": CastleGameCommand.decode_command(ddict["cmd"])}
             self.client.receive_game_command(cmd_dict)
+
         elif ddict["type"] == self.PAYLOAD_TYPE_STATE_CHANGE:
             # state change: {"type": "chgstate", "state": state}
             # DEBUG
             if ddict["state"] == self.client.GAME_STATE_PLAYING:
                 self.client.change_state_start_game()
+
+        elif ddict["type"] == self.PAYLOAD_TYPE_ALL_POSITION:
+            # all position: {"type": allpos, "ownpos": ownpos, "allpos": [pos]}
+            self.client.receive_pos(int(ddict["ownpos"]), ddict["allpos"])
 
     def sendCommandDict(self, cmd_dict):
         # cmd_dict: {"turn": turn, "command": cmd}
@@ -139,7 +144,8 @@ class CastleClient:
     # Game state changes
     # ==================
     def change_state_waiting(self):
-        self.selected_player_pos = None
+        self.own_position = None
+        self.taken_positions = []
         self.game_ui.transition_to_waiting()
         self.current_state = self.GAME_STATE_WAITING
         self.conn.sendStateChange(self.current_state)
@@ -161,6 +167,10 @@ class CastleClient:
     # ==========================
     def select_pos(self, pos):
         self.conn.sendPosSelection(pos)
+
+    def receive_pos(self, ownpos, allpos):
+        self.own_position = ownpos
+        self.taken_positions = allpos
 
     # =====================
     # Game command handling
