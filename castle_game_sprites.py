@@ -92,7 +92,12 @@ class SelectionBox(pygame.sprite.Sprite):
 # =======================
 GAME_FRAMES_PER_LOCK_STEP = 10
 
-class EmptySquare(pygame.sprite.Sprite):
+class BoardGrid(pygame.sprite.Sprite):
+    GROUND_CYAN = pygame.image.load("assets/img/ground_cyan.png")
+    GROUND_PINK = pygame.image.load("assets/img/ground_pink.png")
+    GROUND_ORANGE = pygame.image.load("assets/img/ground_orange.png")
+    GROUND_PURPLE = pygame.image.load("assets/img/ground_purple.png")
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
