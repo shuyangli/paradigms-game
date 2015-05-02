@@ -98,10 +98,14 @@ class EmptySquare(pygame.sprite.Sprite):
 
 
 class Castle(pygame.sprite.Sprite):
-    def __init__(self, image_path, ):
+    def __init__(self, image_path, coord): # coord: (minx, maxx, miny, maxy)
         pygame.sprite.Sprite.__init__(self)
-
-
+        self.image = pygame.image.load(image_path)
+        self.image = pygame.transform.scale(self.image, 
+            (coord[1] - coord[0], coord[3] - coord[2]))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = (coord[0] + coord[1]) / 2
+        self.rect.centery = (coord[2] + coord[3]) / 2
 
 class House(pygame.sprite.Sprite):
     STATE_BUILDING = 0

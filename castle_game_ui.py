@@ -122,6 +122,12 @@ class CastleGameUI:
                                 self.COLOR_LIGHT_PINK,
                                 self.COLOR_LIGHT_ORANGE
                                   ]
+        self.player_castle_images = [
+                                "assets/img/castle-purple.png",
+                                "assets/img/castle-cyan.png",
+                                "assets/img/castle-pink.png",
+                                "assets/img/castle-orange.png",
+                                    ]
         self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, centerx="center", centery=525)
         self.ready_rect_coord = [250, 550, 475, 575]
         self.ready_rect = Rect(self.COLOR_GREY, self.ready_rect_coord)
@@ -224,6 +230,9 @@ class CastleGameUI:
                 waiting_obj_group.append(cursor)
             player_rect = Rect(self.player_rect_colors[i], self.player_rect_coords[i])
             waiting_obj_group.append(player_rect)
+            if self.client.own_position == i:
+                castle = Castle(self.player_castle_images[i], self.player_rect_coords[i])
+                waiting_obj_group.append(castle)
         if self.isReady:
             waiting_obj_group.append(self.waiting_label)
         else:
