@@ -150,6 +150,7 @@ class CastleClient:
         self.conn.sendStateChange(self.current_state)
 
     def change_state_ready(self):
+        self.game_ui.transition_to_ready()
         self.current_state = self.GAME_STATE_READY
         self.conn.sendStateChange(self.current_state)
 
