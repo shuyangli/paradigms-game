@@ -191,31 +191,33 @@ class CastleGameUI:
     # solve the bug where both sides are waiting
     def ui_tick_waiting(self):
         # Process events
-        if not self.isReady:
-            if not self.selectionMade and self.client.own_position != None:
-                self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
-                self.selectionMade = True
-            for e in pygame.event.get():
-                if e.type == KEYDOWN:
-                    if e.key == K_DOWN or e.key == K_UP:
-                        if self.selectionMade:
-                            self.cursor_y = 1 - self.cursor_y
-                    elif e.key == K_LEFT:
-                        if self.cursor_y == 0:
-                            self.cursor_x = (self.cursor_x - 1) % 4
-                    elif e.key == K_RIGHT:
-                        if self.cursor_y == 0:
-                            self.cursor_x = (self.cursor_x + 1) % 4
-                    elif e.key == K_SPACE:
-                        if self.cursor_y == 0:
-                            self.client.select_pos(self.cursor_x)
-                        elif self.cursor_y == 1:
-                            if not self.isReady:
-                                self.isReady = True
-                                #self.client.change_state_ready()
+        for e in pygame.event.get():
+            if self.isReady:
+                pass
+            elif e.type == KEYDOWN:
+                if e.key == K_DOWN or e.key == K_UP:
+                    if self.selectionMade:
+                        self.cursor_y = 1 - self.cursor_y
+                elif e.key == K_LEFT:
+                    if self.cursor_y == 0:
+                        self.cursor_x = (self.cursor_x - 1) % 4
+                elif e.key == K_RIGHT:
+                    if self.cursor_y == 0:
+                        self.cursor_x = (self.cursor_x + 1) % 4
+                elif e.key == K_SPACE:
+                    if self.cursor_y == 0:
+                        self.client.select_pos(self.cursor_x)
+                    elif self.cursor_y == 1:
+                        self.isReady = True
+                        self.client.change_state_ready()
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
         self.update_player_rect_colors()
+
+        if not self.selectionMade and self.client.own_position != None:
+            self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
+            self.selectionMade = True
+
         waiting_obj_group = []
         for i in xrange(4):
             if self.cursor_y == 0 and self.cursor_x == i:
