@@ -9,7 +9,7 @@ from castle_game_sprites import *
 class CastleGameUI:
     """UI class for Castle game."""
 
-    # 10 game frames per lockstep, 5 locksteps per second
+    # 10 game frames per lockstep, 6 locksteps per second
     # Realistically this would change based on network latency
     GAME_FRAMES_PER_LOCK_STEP = 10
     game_frame_id = 0
@@ -261,7 +261,7 @@ class CastleGameUI:
     # Actual game ticking
     # ===================
     def ui_tick_game(self):
-        # Called every actual frame (hopefully 50 fps)
+        # Called every actual frame (hopefully 60 fps)
         # First process lockstep stuff
         if self.game_frame_id == 0:
             # Every first game frame, we advance the lock step

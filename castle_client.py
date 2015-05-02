@@ -99,8 +99,7 @@ class CastleClientProtocolFactory(ClientFactory):
 class CastleClient:
     """Castle game client class."""
     # FPS requested
-    # NOTE (SL): this is 50 instead of 60 to avoid floating point division
-    DESIRED_FPS = 50.0
+    DESIRED_FPS = 60.0
 
     # Game states
     GAME_STATE_WAITING = 0
@@ -194,7 +193,7 @@ class CastleClient:
     # Ticking mechanism
     # =================
     def tick_lock_step(self):
-        # Called every lock step (~10 fps), simulate actual game
+        # Called every lock step, simulate actual game
         # Check if it's ready first, and return false if it's not ready to advance
         self.lock_step_id += 1
         if DEBUG: print "[INFO][TICK] {0}".format(self.lock_step_id)
