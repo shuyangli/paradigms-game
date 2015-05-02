@@ -187,8 +187,7 @@ class CastleGameUI:
             else:
                 self.player_rect_colors[i] = self.COLOR_GREEN
 
-    # TODO:
-    # solve the bug where both sides are waiting
+    # TODO: transition to the ready state when all people are ready
     def ui_tick_waiting(self):
         # Process events
         if not self.isReady:
