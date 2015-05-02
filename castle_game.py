@@ -142,7 +142,7 @@ class CastleGameModel:
     HEIGHT = 8
 
     def __init__(self):
-        self.empty_square = EmptySquare()
+        self.empty_square = BoardGrid()
         self.board = [[self.empty_square] * self.WIDTH] * self.HEIGHT
         self.player_models = []
 
