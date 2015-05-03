@@ -91,10 +91,10 @@ class CastleGameUI:
 
         play_label = BasicLabel(self, "PLAY", self.COLOR_BLACK, centerx="center", centery=375)
         instr_label = BasicLabel(self, "INSTRUCTIONS", self.COLOR_BLACK, centerx="center", centery=425)
-        exit_label = BasicLabel(self, "EXIT", self.COLOR_BLACK, centerx="center", centery=475)
+        exit_label = BasicLabel(self, "QUIT", self.COLOR_BLACK, centerx="center", centery=475)
         self.menu_label_group = pygame.sprite.Group(play_label, instr_label, exit_label)
 
-        self.cursor = Cursor(self.COLOR_RED, play_label.rect)
+        self.cursor = Cursor(self.COLOR_RED, play_label.rect, width=4)
         self.cursor_pos_menu = [play_label.rect, instr_label.rect, exit_label.rect]
 
 
