@@ -107,6 +107,9 @@ class CastleGamePlayerModel:
         self.buildings = buildings  # [buildings]
         self.soldiers = soldiers    # [soldiers]
 
+        self.castle = Castle(self, self.castle_grid)
+        self.castle_grid._set_building(self.castle)
+
         # Path
         self.path = None
 
@@ -121,6 +124,7 @@ class CastleGamePlayerModel:
     # Ticking mechanism
     # =================
     def update(self):
+        self.castle.update()
         for building in self.buildings:
             building.update()
         for soldier in self.soldiers:
@@ -169,7 +173,7 @@ class CastleGameModel:
             player = CastleGamePlayerModel(PLAYER_PURPLE, self.board[0][0])
             self.player_models.append(player)
         if PLAYER_PINK in all_players_pos:
-            player = CastleGamePlayerModel(PLAYER_PINK, self.board[0][self.WIDTH-1-j])
+            player = CastleGamePlayerModel(PLAYER_PINK, self.board[0][self.WIDTH-1])
             self.player_models.append(player)
         if PLAYER_CYAN in all_players_pos:
             player = CastleGamePlayerModel(PLAYER_CYAN, self.board[self.HEIGHT-1][self.WIDTH-1])

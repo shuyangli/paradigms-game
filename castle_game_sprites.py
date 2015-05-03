@@ -164,6 +164,9 @@ class BoardGrid(pygame.sprite.Sprite):
     def add_owner(self, owner):
         self.owners.append(owner)
 
+    def _set_building(self, building):
+        self.building = building
+
     @property
     def owner(self):
         if self.building is None:
@@ -179,8 +182,28 @@ class BoardGrid(pygame.sprite.Sprite):
         return self.GROUND_IMG[self.owner]
 
 class Castle(pygame.sprite.Sprite):
-    def __init__(self):
+    CASTLE_CYAN = pygame.image.load("assets/img/castle-cyan.png")
+    CASTLE_PINK = pygame.image.load("assets/img/castle-pink.png")
+    CASTLE_ORANGE = pygame.image.load("assets/img/castle-orange.png")
+    CASTLE_PURPLE = pygame.image.load("assets/img/castle-purple.png")
+    CASTLE_IMG = [CASTLE_PURPLE, CASTLE_PINK, CASTLE_CYAN, CASTLE_ORANGE]
+
+    def __init__(self, player, grid):
+        self.owner = player.pos
+        self.grid = grid
+        self.image = self.CASTLE_IMG[self.owner]
+
+        self.rect = self.image.get_rect()
+        self.rect.center = self.grid.rect.center
+        print self.rect
+        print self.grid.rect
+
+    # =================
+    # Ticking mechanism
+    # =================
+    def update(self):
         pass
+
 
 class House(pygame.sprite.Sprite):
     STATE_BUILDING = 0
@@ -348,7 +371,7 @@ class PathSection(pygame.sprite.Sprite):
         self.start_y = start_y
         self.end_x = end_x
         self.end_y = end_y
-        
+
         self.image = None
         if self.start_x == self.end_x: # vertical
             self.image = pygame.Surface([width, abs(self.end_y - self.start_y)])
@@ -361,5 +384,5 @@ class PathSection(pygame.sprite.Sprite):
         self.next_from_start = []
         self.next_from_end = []
 
-        
+
 

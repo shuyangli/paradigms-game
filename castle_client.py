@@ -156,6 +156,7 @@ class CastleClient:
 
     def change_state_start_game(self):
         self.game_ui.start_game(self.taken_positions, self.own_position)
+        self.game_ui.transition_to_playing()
         self.current_state = self.GAME_STATE_PLAYING
         self.conn.sendStateChange(self.current_state)
 

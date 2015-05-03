@@ -41,6 +41,7 @@ class CastleGameUI:
     COLOR_LIGHT_ORANGE = (249, 243, 209)
 
     PLAYER_COLOR_LIGHT = [COLOR_LIGHT_PURPLE, COLOR_LIGHT_PINK, COLOR_LIGHT_CYAN, COLOR_LIGHT_ORANGE]
+    PLAYER_COLOR_DARK = [COLOR_DARK_PURPLE, COLOR_DARK_PINK, COLOR_DARK_CYAN, COLOR_DARK_ORANGE]
 
     def __init__(self, debug=False):
         # Init pygame
@@ -119,6 +120,13 @@ class CastleGameUI:
         self.cursor_y = 1
 
         self.waiting_label = BasicLabel(self, "WAITING FOR OPPONENTS ...", self.COLOR_BLACK, centerx="center", centery=525)
+
+
+    def transition_to_playing(self):
+        default_cursor_positions = [(0, 0), (0, 7), (7, 7), (7, 0)]
+        self.cursor_y, self.cursor_x = default_cursor_positions[self.client.own_position]
+
+        self.cursor = Cursor(self.PLAYER_COLOR_DARK[self.client.own_position], self.game_model.board[self.cursor_y][self.cursor_x].rect)
 
     # ===============================
     # Ticking mechanism
@@ -251,8 +259,21 @@ class CastleGameUI:
         # Process events
         for e in pygame.event.get():
             if e.type == KEYDOWN:
+                if e.key == K_LEFT:
+                    self.cursor_x = (self.cursor_x - 1) % 8
+                    self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+                elif e.key == K_RIGHT:
+                    self.cursor_x = (self.cursor_x + 1) % 8
+                    self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+                elif e.key == K_UP:
+                    self.cursor_y = (self.cursor_y - 1) % 8
+                    self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+                elif e.key == K_DOWN:
+                    self.cursor_y = (self.cursor_y + 1) % 8
+                    self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+
                 # DEBUG
-                if e.key == K_SPACE:
+                elif e.key == K_SPACE:
                     cmd = CastleGameCommand.Build(CastleGameCommand.Build.HOUSE, 0, 0)
                     self.client.queue_command(cmd)
 
@@ -262,6 +283,7 @@ class CastleGameUI:
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
         self.game_model.draw(self.screen)
+        self.cursor.draw(self.screen)
         # TODO: draw instructions, user labels, and so on
 
         pygame.display.flip()
