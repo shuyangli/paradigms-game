@@ -92,11 +92,6 @@ class CastleGameCommand:
 
 class CastleGamePlayerModel:
     """Castle game player class."""
-    # Castle position
-    POS_TOP_LEFT = (0, 0)
-    POS_TOP_RIGHT = (0, 6)
-    POS_BTM_LEFT = (6, 0)
-    POS_BTM_RIGHT = (6, 6)
 
     # Default value
     INITIAL_MONEY = 0
@@ -105,13 +100,22 @@ class CastleGamePlayerModel:
     GAME_FRAMES_PER_LOCK_STEP = 10
     step_count = 0
 
-    def __init__(self):
+    def __init__(self, pos, castle_grid, buildings=[], soldiers=[]):
         # TODO: clean this up
+        self.pos = pos
+        self.castle_grid = castle_grid
+        self.buildings = buildings  # [buildings]
+        self.soldiers = soldiers    # [soldiers]
+
+        # Path
+        self.path = None
+
         self.money = self.INITIAL_MONEY
-        self.castle = Castle()
-        self.buildings = []     # [buildings]
-        self.army = []          # [soldiers]
         self.money_increment = self.INITIAL_MONEY_INCREMENT
+
+    def destroy(self):
+        # called when the player is defeated
+        pass
 
     # =================
     # Ticking mechanism
@@ -119,7 +123,7 @@ class CastleGamePlayerModel:
     def update(self):
         for building in self.buildings:
             building.update()
-        for soldier in self.army:
+        for soldier in self.soldiers:
             soldier.update()
 
     def tick_lock_step(self):
@@ -132,7 +136,7 @@ class CastleGamePlayerModel:
 
         for building in self.buildings:
             building.tick_lock_step()
-        for soldier in self.army:
+        for soldier in self.soldiers:
             soldier.tick_lock_step()
 
 
@@ -141,18 +145,38 @@ class CastleGameModel:
     WIDTH = 8
     HEIGHT = 8
 
-    def __init__(self, all_players_pos, current_player_pos):
+    def __init__(self, all_players_pos, current_player_pos, debug=False):
+        global DEBUG
+        DEBUG = debug
+
         self.board = [[BoardGrid(x, y) for x in range(self.WIDTH)] for y in range(self.HEIGHT)]
 
         # Set default owners
         for i in range(3):
             for j in range(3):
-                self.board[i][j]._set_owner(PLAYER_PURPLE)
-                self.board[self.WIDTH-1-i][j]._set_owner(PLAYER_PINK)
-                self.board[self.WIDTH-1-i][self.HEIGHT-1-j]._set_owner(PLAYER_CYAN)
-                self.board[i][self.HEIGHT-1-j]._set_owner(PLAYER_ORANGE)
+                if PLAYER_PURPLE in all_players_pos:
+                    self.board[i][j]._set_owner(PLAYER_PURPLE)
+                if PLAYER_PINK in all_players_pos:
+                    self.board[i][self.WIDTH-1-j]._set_owner(PLAYER_PINK)
+                if PLAYER_CYAN in all_players_pos:
+                    self.board[self.HEIGHt-1-i][self.WIDTH-1-j]._set_owner(PLAYER_CYAN)
+                if PLAYER_ORANGE in all_players_pos:
+                    self.board[self.HEIGHT-1-i][j]._set_owner(PLAYER_ORANGE)
 
+        # Add player models
         self.player_models = []
+        if PLAYER_PURPLE in all_players_pos:
+            player = CastleGamePlayerModel(PLAYER_PURPLE, self.board[0][0])
+            self.player_models.append(player)
+        if PLAYER_PINK in all_players_pos:
+            player = CastleGamePlayerModel(PLAYER_PINK, self.board[0][self.WIDTH-1-j])
+            self.player_models.append(player)
+        if PLAYER_CYAN in all_players_pos:
+            player = CastleGamePlayerModel(PLAYER_CYAN, self.board[self.HEIGHT-1][self.WIDTH-1])
+            self.player_models.append(player)
+        if PLAYER_ORANGE in all_players_pos:
+            player = CastleGamePlayerModel(PLAYER_ORANGE, self.board[self.HEIGHT-1][0])
+            self.player_models.append(player)
 
     def prepare_game(self, client):
         pass
