@@ -40,7 +40,7 @@ class CastleGameUI:
     COLOR_ORANGE = (247, 184, 45)
     COLOR_LIGHT_ORANGE = (249, 243, 209)
 
-    PLAYER_COLOR_SELECTED = [COLOR_LIGHT_PURPLE, COLOR_LIGHT_PINK, COLOR_LIGHT_CYAN, COLOR_LIGHT_ORANGE]
+    PLAYER_COLOR_LIGHT = [COLOR_LIGHT_PURPLE, COLOR_LIGHT_PINK, COLOR_LIGHT_CYAN, COLOR_LIGHT_ORANGE]
 
     def __init__(self, debug=False):
         # Init pygame
@@ -155,13 +155,6 @@ class CastleGameUI:
         self.cursor.draw(self.screen)
         pygame.display.flip()
 
-    # get the coordinates of the encompassing rectangle
-    # that is width wider on each side
-    def border_coord(self, coord, width): # coord: [minx, maxx, miny, maxy]
-        return [coord[0] - width,
-                coord[1] + width,
-                coord[2] - width,
-                coord[3] + width]
 
     # TODO: transition to the ready state when all people are ready
     def ui_tick_waiting(self):
@@ -191,7 +184,7 @@ class CastleGameUI:
         # Rectangles
         for i in range(4):
             if i in self.client.taken_positions:
-                self.player_rects[i].set_color(self.PLAYER_COLOR_SELECTED[i])
+                self.player_rects[i].set_color(self.PLAYER_COLOR_LIGHT[i])
                 self.screen.blit(self.player_rects[i].image, self.player_rects[i].rect)
                 castle = PlayerCastle(i, self.player_rects[i].rect)
                 self.screen.blit(castle.image, castle.rect)
@@ -225,7 +218,7 @@ class CastleGameUI:
         # Rectangles
         for i in range(4):
             if i in self.client.taken_positions:
-                self.player_rects[i].set_color(self.PLAYER_COLOR_SELECTED[i])
+                self.player_rects[i].set_color(self.PLAYER_COLOR_LIGHT[i])
                 self.screen.blit(self.player_rects[i].image, self.player_rects[i].rect)
                 castle = PlayerCastle(i, self.player_rects[i].rect)
                 self.screen.blit(castle.image, castle.rect)
