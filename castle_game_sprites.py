@@ -186,9 +186,8 @@ class House(pygame.sprite.Sprite):
     COUNT_COOLDOWN_TO_READY = 3 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
-    def __init__(self, game_model, game_player):
+    def __init__(self, game_player):
         pygame.sprite.Sprite.__init__(self)
-        self.game_model = game_model
         self.game_player = game_player
         self.state = self.STATE_BUILDING
 
@@ -244,9 +243,8 @@ class Tower(pygame.sprite.Sprite):
     COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
-    def __init__(self, game_model, game_player):
+    def __init__(self, game_player):
         pygame.sprite.Sprite.__init__(self)
-        self.game_model = game_model
         self.game_player = game_player
         self.state = self.STATE_BUILDING
 
@@ -301,9 +299,8 @@ class Market(pygame.sprite.Sprite):
 
     MONEY_INCREMENT = 5
 
-    def __init__(self, game_model, game_player):
+    def __init__(self, game_player):
         pygame.sprite.Sprite.__init__(self)
-        self.game_model = game_model
         self.game_player = game_player
         self.state = self.STATE_BUILDING
 
