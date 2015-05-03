@@ -40,19 +40,7 @@ class CastleGameUI:
     COLOR_ORANGE = (247, 184, 45)
     COLOR_LIGHT_ORANGE = (249, 243, 209)
 
-    # minx, maxx, miny, maxy of the four rectangles for players to choose
-    player_rect_coords = [[125, 225, 275, 375],
-                            [275, 375, 275, 375],
-                            [425, 525, 275, 375],
-                            [575, 675, 275, 375]]
-    player_rect_colors = [COLOR_GREEN,
-                            COLOR_GREEN,
-                            COLOR_GREEN,
-                            COLOR_GREEN]
-    player_rect_selected_colors = [COLOR_LIGHT_PURPLE,
-                                    COLOR_LIGHT_PINK,
-                                    COLOR_LIGHT_CYAN,
-                                    COLOR_LIGHT_ORANGE]
+    PLAYER_COLOR_SELECTED = [COLOR_LIGHT_PURPLE, COLOR_LIGHT_PINK, COLOR_LIGHT_CYAN, COLOR_LIGHT_ORANGE]
 
     def __init__(self, debug=False):
         # Init pygame
@@ -104,13 +92,10 @@ class CastleGameUI:
         play_label = BasicLabel(self, "PLAY", self.COLOR_BLACK, centerx="center", centery=375)
         instr_label = BasicLabel(self, "INSTRUCTIONS", self.COLOR_BLACK, centerx="center", centery=425)
         exit_label = BasicLabel(self, "EXIT", self.COLOR_BLACK, centerx="center", centery=475)
+        self.menu_label_group = pygame.sprite.Group(play_label, instr_label, exit_label)
 
-        self.right_arrow = BasicArrow(self)
-        arrow_pos = [(play_label.rect.left - self.right_arrow.rect.width, play_label.rect.centery),
-                    (instr_label.rect.left - self.right_arrow.rect.width, instr_label.rect.centery),
-                    (exit_label.rect.left - self.right_arrow.rect.width, exit_label.rect.centery)]
-        self.right_arrow.positions = arrow_pos
-        self.menu_label_group = pygame.sprite.Group(self.right_arrow, play_label, instr_label, exit_label)
+        self.cursor = Cursor(self.COLOR_RED, play_label.rect)
+        self.cursor_pos_menu = [play_label.rect, instr_label.rect, exit_label.rect]
 
 
     def transition_to_waiting(self):
@@ -118,9 +103,16 @@ class CastleGameUI:
         self.cursor_y = 0
 
         self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, centerx="center", centery=525)
-        self.ready_rect_coord = [250, 550, 475, 575]
-        self.ready_rect = Rect(self.COLOR_GREY, self.ready_rect_coord)
-        self.selectionMade = False
+        self.ready_rect = Rect(self.COLOR_GREY, [250, 550, 475, 575])
+
+        # minx, maxx, miny, maxy of the four rectangles for players to choose
+        player_rect_coords = [[125, 225, 275, 375],
+                            [275, 375, 275, 375],
+                            [425, 525, 275, 375],
+                            [575, 675, 275, 375]]
+        self.player_rects = [Rect(self.COLOR_GREEN, player_rect_coords[i]) for i in range(4)]
+        self.cursor = Cursor(self.COLOR_RED, self.player_rects[0].rect)
+
 
     def transition_to_ready(self):
         self.cursor_x = 0
@@ -153,22 +145,15 @@ class CastleGameUI:
                         self.exit()
                         return
 
-                if DEBUG:
-                    print "Selection: {0}".format(self.cursor_y)
+                if DEBUG: print "[INFO][UI] Selection: {0}".format(self.cursor_y)
 
         # Drawing
-        self.right_arrow.update_selection(self.cursor_y)
+        self.cursor.set_rect(self.cursor_pos_menu[self.cursor_y])
+
         self.screen.fill(self.COLOR_WHITE)
         self.menu_label_group.draw(self.screen)
+        self.cursor.draw(self.screen)
         pygame.display.flip()
-
-    def draw_obj_group(self, obj_group):
-        for obj in obj_group:
-            if hasattr(obj, "images"):
-                for subobj in obj.images:
-                    self.screen.blit(subobj[0], subobj[1])
-            else:
-                self.screen.blit(obj.image, obj.rect)
 
     # get the coordinates of the encompassing rectangle
     # that is width wider on each side
@@ -178,21 +163,16 @@ class CastleGameUI:
                 coord[2] - width,
                 coord[3] + width]
 
-    def update_player_rect_colors(self):
-        for i in xrange(4):
-            if i in self.client.taken_positions:
-                self.player_rect_colors[i] = self.player_rect_selected_colors[i]
-            else:
-                self.player_rect_colors[i] = self.COLOR_GREEN
-
     # TODO: transition to the ready state when all people are ready
     def ui_tick_waiting(self):
         # Process events
         for e in pygame.event.get():
             if e.type == KEYDOWN:
                 if e.key == K_DOWN or e.key == K_UP:
-                    if self.selectionMade:
+                    if self.client.own_position is not None:
                         self.cursor_y = 1 - self.cursor_y
+                    else:
+                        self.cursor_y = 0
                 elif e.key == K_LEFT:
                     if self.cursor_y == 0:
                         self.cursor_x = (self.cursor_x - 1) % 4
@@ -204,49 +184,57 @@ class CastleGameUI:
                         self.client.select_pos(self.cursor_x)
                     elif self.cursor_y == 1:
                         self.client.change_state_ready()
+
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
-        self.update_player_rect_colors()
 
-        if not self.selectionMade and self.client.own_position != None:
-            self.ready_rect = Rect(self.COLOR_YELLOW, self.ready_rect_coord)
-            self.selectionMade = True
+        # Rectangles
+        for i in range(4):
+            if i in self.client.taken_positions:
+                self.player_rects[i].set_color(self.PLAYER_COLOR_SELECTED[i])
+                self.screen.blit(self.player_rects[i].image, self.player_rects[i].rect)
+                castle = PlayerCastle(i, self.player_rects[i].rect)
+                self.screen.blit(castle.image, castle.rect)
+            else:
+                self.player_rects[i].set_color(self.COLOR_GREEN)
+                self.screen.blit(self.player_rects[i].image, self.player_rects[i].rect)
 
-        waiting_obj_group = []
-        for i in xrange(4):
-            if self.cursor_y == 0 and self.cursor_x == i:
-                cursor = Cursor(self.COLOR_RED, self.player_rect_coords[i], 5)
-                waiting_obj_group.append(cursor)
-            player_rect = Rect(self.player_rect_colors[i], self.player_rect_coords[i])
-            waiting_obj_group.append(player_rect)
-            if self.client.taken_positions != None and i in self.client.taken_positions:
-                castle = PlayerCastle(i, self.player_rect_coords[i])
-                waiting_obj_group.append(castle)
-        if self.cursor_y == 1:
-            cursor = Cursor(self.COLOR_RED, self.ready_rect_coord, 5)
-            waiting_obj_group.append(cursor)
-        waiting_obj_group.extend([self.ready_rect, self.ready_label])
-        self.draw_obj_group(waiting_obj_group)
+        # Draw ready rect
+        if self.client.own_position is not None:
+            self.ready_rect.set_color(self.COLOR_YELLOW)
+        self.screen.blit(self.ready_rect.image, self.ready_rect.rect)
+        self.screen.blit(self.ready_label.image, self.ready_label.rect)
+
+        # Draw cursor
+        if self.cursor_y == 0:
+            self.cursor.set_rect(self.player_rects[self.cursor_x].rect)
+        elif self.cursor_y == 1:
+            self.cursor.set_rect(self.ready_rect.rect)
+        self.cursor.draw(self.screen)
+
         pygame.display.flip()
 
 
     def ui_tick_ready(self):
         # Process events
-        for e in pygame.event.get():
-            pass
+        for e in pygame.event.get(): pass
 
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
-        self.update_player_rect_colors()
-        waiting_obj_group = []
-        for i in xrange(4):
-            player_rect = Rect(self.player_rect_colors[i], self.player_rect_coords[i])
-            waiting_obj_group.append(player_rect)
-            if self.client.taken_positions != None and i in self.client.taken_positions:
-                castle = PlayerCastle(i, self.player_rect_coords[i])
-                waiting_obj_group.append(castle)
-        waiting_obj_group.append(self.waiting_label)
-        self.draw_obj_group(waiting_obj_group)
+
+        # Rectangles
+        for i in range(4):
+            if i in self.client.taken_positions:
+                self.player_rects[i].set_color(self.PLAYER_COLOR_SELECTED[i])
+                self.screen.blit(self.player_rects[i].image, self.player_rects[i].rect)
+                castle = PlayerCastle(i, self.player_rects[i].rect)
+                self.screen.blit(castle.image, castle.rect)
+            else:
+                self.player_rects[i].set_color(self.COLOR_GREEN)
+                self.screen.blit(self.player_rects[i].image, self.player_rects[i].rect)
+
+        self.screen.blit(self.waiting_label.image, self.waiting_label.rect)
+
         pygame.display.flip()
 
 
