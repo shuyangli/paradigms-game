@@ -41,30 +41,18 @@ class CastleGameUI:
     COLOR_LIGHT_ORANGE = (249, 243, 209)
 
     # minx, maxx, miny, maxy of the four rectangles for players to choose
-    player_rect_coords = [
-                            [125, 225, 275, 375],
+    player_rect_coords = [[125, 225, 275, 375],
                             [275, 375, 275, 375],
                             [425, 525, 275, 375],
-                            [575, 675, 275, 375]
-                         ]
-    player_rect_colors = [
+                            [575, 675, 275, 375]]
+    player_rect_colors = [COLOR_GREEN,
                             COLOR_GREEN,
                             COLOR_GREEN,
-                            COLOR_GREEN,
-                            COLOR_GREEN
-                         ]
-    player_rect_selected_colors = [
-                            COLOR_LIGHT_PURPLE,
-                            COLOR_LIGHT_CYAN,
-                            COLOR_LIGHT_PINK,
-                            COLOR_LIGHT_ORANGE
-                                  ]
-    player_castle_images = [
-                            "assets/img/castle-purple.png",
-                            "assets/img/castle-cyan.png",
-                            "assets/img/castle-pink.png",
-                            "assets/img/castle-orange.png",
-                           ]
+                            COLOR_GREEN]
+    player_rect_selected_colors = [COLOR_LIGHT_PURPLE,
+                                    COLOR_LIGHT_PINK,
+                                    COLOR_LIGHT_CYAN,
+                                    COLOR_LIGHT_ORANGE]
 
     def __init__(self, debug=False):
         # Init pygame
@@ -232,7 +220,7 @@ class CastleGameUI:
             player_rect = Rect(self.player_rect_colors[i], self.player_rect_coords[i])
             waiting_obj_group.append(player_rect)
             if self.client.taken_positions != None and i in self.client.taken_positions:
-                castle = Castle(self.player_castle_images[i], self.player_rect_coords[i])
+                castle = PlayerCastle(i, self.player_rect_coords[i])
                 waiting_obj_group.append(castle)
         if self.cursor_y == 1:
             cursor = Cursor(self.COLOR_RED, self.ready_rect_coord, 5)
@@ -255,7 +243,7 @@ class CastleGameUI:
             player_rect = Rect(self.player_rect_colors[i], self.player_rect_coords[i])
             waiting_obj_group.append(player_rect)
             if self.client.taken_positions != None and i in self.client.taken_positions:
-                castle = Castle(self.player_castle_images[i], self.player_rect_coords[i])
+                castle = PlayerCastle(i, self.player_rect_coords[i])
                 waiting_obj_group.append(castle)
         waiting_obj_group.append(self.waiting_label)
         self.draw_obj_group(waiting_obj_group)
