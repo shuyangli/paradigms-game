@@ -142,17 +142,21 @@ class CastleGameModel:
     HEIGHT = 8
 
     def __init__(self):
-        self.empty_square = BoardGrid()
-        self.board = [[self.empty_square] * self.WIDTH] * self.HEIGHT
+        self.board = [[BoardGrid(x, y) for x in range(self.WIDTH)] for y in range(self.HEIGHT)]
         self.player_models = []
 
     def prepare_game(self, client):
         pass
 
-    def update(self):
+    def tick_ui(self):
         # called every ui frame
         for player in self.player_models:
             player.update()
+
+    def draw(self, surface):
+        for row in self.board:
+            for cell in row:
+                cell.draw(surface)
 
     def tick_lock_step(self):
         # called every lockstep

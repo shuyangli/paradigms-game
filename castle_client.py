@@ -221,4 +221,4 @@ class CastleClient:
             self.game_ui.ui_tick_game()
         else:
             # Something bad occured
-            print "Bad current state"
+            print "[ERROR] Invalid current state"

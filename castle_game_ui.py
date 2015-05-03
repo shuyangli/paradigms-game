@@ -128,7 +128,7 @@ class CastleGameUI:
     def transition_to_waiting(self):
         self.cursor_x = 0
         self.cursor_y = 0
-        
+
         self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, centerx="center", centery=525)
         self.ready_rect_coord = [250, 550, 475, 575]
         self.ready_rect = Rect(self.COLOR_GREY, self.ready_rect_coord)
@@ -266,7 +266,6 @@ class CastleGameUI:
     # Actual game ticking
     # ===================
     def ui_tick_game(self):
-        # Called every actual frame (hopefully 60 fps)
         # First process lockstep stuff
         if self.game_frame_id == 0:
             # Every first game frame, we advance the lock step
@@ -289,14 +288,11 @@ class CastleGameUI:
                     self.client.queue_command(cmd)
 
         # Ticking
-        self.game_model.update()
+        self.game_model.tick_ui()
 
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
-        # for sprite in self.sprites:
-        #     sprite.draw()
-        #
-        # DEBUG
-        label = self.font.render("Game state", 1, self.COLOR_BLACK)
-        self.screen.blit(label, (100, 100))
+        self.game_model.draw(self.screen)
+        # TODO: draw instructions, user labels, and so on
+
         pygame.display.flip()

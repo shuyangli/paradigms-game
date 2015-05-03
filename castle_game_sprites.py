@@ -1,6 +1,12 @@
 import pygame
 from pygame.locals import *
 
+PLAYER_NONE = -1
+PLAYER_PURPLE = 0
+PLAYER_PINK = 1
+PLAYER_CYAN = 2
+PLAYER_ORANGE = 3
+
 # ===========
 # UI elements
 # ===========
@@ -97,20 +103,64 @@ class BoardGrid(pygame.sprite.Sprite):
     GROUND_PINK = pygame.image.load("assets/img/ground_pink.png")
     GROUND_ORANGE = pygame.image.load("assets/img/ground_orange.png")
     GROUND_PURPLE = pygame.image.load("assets/img/ground_purple.png")
+    GROUND_GREEN = pygame.image.load("assets/img/ground_green.png")
 
-    def __init__(self):
+    GROUND_IMG = [GROUND_PURPLE, GROUND_PINK, GROUND_CYAN, GROUND_ORANGE, GROUND_GREEN]
+
+    X_OFFSET = 200
+    Y_OFFSET = 50
+    WIDTH = 50
+    HEIGHT = 50
+    TRUE_WIDTH = 46
+    TRUE_HEIGHT = 46
+
+    def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
+        self.owners = []
+        self.building = None
+
+        left = self.X_OFFSET + self.WIDTH * x + (self.WIDTH - self.TRUE_WIDTH) / 2
+        top = self.Y_OFFSET + self.HEIGHT * y + (self.HEIGHT - self.TRUE_HEIGHT) / 2
+        self.rect = pygame.Rect(left, top, self.TRUE_WIDTH, self.TRUE_HEIGHT)
+
+    def draw(self, surface):
+        # draw ground
+        surface.blit(self.image, self.rect)
+        # draw building
+        if self.building is not None:
+            surface.blit(self.building.image, self.rect)
+
+    def _set_owner(self, owner):
+        self.owners = [owner]
+
+    def add_owner(self, owner):
+        self.owners.append(owner)
+
+    @property
+    def owner(self):
+        if self.building is None:
+            if len(self.owners) > 0:
+                return self.owners[-1]
+            else:
+                return PLAYER_NONE
+        else:
+            return self.building.owner
+
+    @property
+    def image(self):
+        return self.GROUND_IMG[self.owner]
 
 
 class Castle(pygame.sprite.Sprite):
     def __init__(self, image_path, coord): # coord: (minx, maxx, miny, maxy)
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(self.image, 
+        self.image = pygame.transform.scale(self.image,
             (coord[1] - coord[0], coord[3] - coord[2]))
         self.rect = self.image.get_rect()
         self.rect.centerx = (coord[0] + coord[1]) / 2
         self.rect.centery = (coord[2] + coord[3]) / 2
+
 
 class House(pygame.sprite.Sprite):
     STATE_BUILDING = 0
