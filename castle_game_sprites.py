@@ -66,14 +66,14 @@ class Cursor(pygame.sprite.Sprite):
         cursor_cover_width = cursor_coverage * rect.width
         cursor_cover_height = cursor_coverage * rect.height
         rect_coords = [
-                        [minx - self.width, minx, miny - self.width, miny + cursor_coverage * rect.height],
-                        [minx, minx + cursor_cover_width, miny - self.width, miny],
-                        [maxx - cursor_cover_width, maxx + self.width, miny - self.width, miny],
-                        [maxx, maxx + self.width, miny, miny + cursor_coverage * rect.height],
-                        [maxx, maxx + self.width, maxy - cursor_coverage * rect.height, maxy + self.width],
-                        [maxx - cursor_cover_width, maxx, maxy, maxy + self.width],
-                        [minx - self.width, minx + cursor_cover_width, maxy, maxy + self.width],
-                        [minx - self.width, minx, maxy - cursor_coverage * rect.height, maxy]
+            [minx - self.width, minx, miny - self.width, miny + cursor_coverage * rect.height],
+            [minx, minx + cursor_cover_width, miny - self.width, miny],
+            [maxx - cursor_cover_width, maxx + self.width, miny - self.width, miny],
+            [maxx, maxx + self.width, miny, miny + cursor_coverage * rect.height],
+            [maxx, maxx + self.width, maxy - cursor_coverage * rect.height, maxy + self.width],
+            [maxx - cursor_cover_width, maxx, maxy, maxy + self.width],
+            [minx - self.width, minx + cursor_cover_width, maxy, maxy + self.width],
+            [minx - self.width, minx, maxy - cursor_coverage * rect.height, maxy]
                       ]
         self.images = []
         for rect_coord in rect_coords:
@@ -420,6 +420,4 @@ class PathSection(pygame.sprite.Sprite):
         self.rect.centery = (end_x + end_y) / 2
         self.next_from_start = []
         self.next_from_end = []
-
-
 
