@@ -112,7 +112,7 @@ class CastleServerProtocol(LineReceiver):
             else:
                 self.sendPosition()
 
-        elif ddict["type"] == self.PAYLOAD_TYEP_LOCKSTEP_FINISH:
+        elif ddict["type"] == self.PAYLOAD_TYPE_LOCKSTEP_FINISH:
             # lockstep finish: {"type": "lkf", "step": lockstep}
             self.server.player_step[self.own_position] = ddict["step"]
             for step in self.server.player_step:
