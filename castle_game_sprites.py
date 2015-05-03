@@ -329,6 +329,9 @@ class Market(pygame.sprite.Sprite):
 class Path(pygame.sprite.Sprite):
     def __init__(self, game_model, game_player):
         pygame.sprite.Sprite.__init__(self)
+        self.game_model = game_model
+        self.game_player = game_player
+        self.sections = []
 
 
 class PathSection(pygame.sprite.Sprite):
@@ -340,7 +343,12 @@ class PathSection(pygame.sprite.Sprite):
         self.start_y = start_y
         self.end_x = end_x
         self.end_y = end_y
-        self.image = pygame.Surface([coord[1] - coord[0], coord[3] - coord[2]])
+        
+        self.image = None
+        if self.start_x = self.end_x: # vertical
+            self.image = pygame.Surface([width, abs(self.end_y - self.start_y)])
+        elif self.start_y = self.end_y: # horizontal
+            self.image = pygame.Surface([abs(self.end_x - self.start_x), width])
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.centerx = (start_x + start_y) / 2
@@ -348,13 +356,5 @@ class PathSection(pygame.sprite.Sprite):
         self.next_from_start = []
         self.next_from_end = []
 
-    def isStartOrEnd(self, x, y): # 0 means (x, y) is the start point, 1 means end, -1 means neither
-        if x == self.start_x and y == self.start_y: return 0
-        if x == self.end_x and y == self.end_y: return 1
-        return -1
 
-    def connectPathSection(self, path_section):
-        pass
 
-    def disconnectPathSection(self, path_section):
-        pass
