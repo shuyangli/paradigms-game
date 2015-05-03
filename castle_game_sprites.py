@@ -356,5 +356,5 @@ class PathSection(pygame.sprite.Sprite):
         self.next_from_start = []
         self.next_from_end = []
 
-
+        
 
