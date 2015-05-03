@@ -274,7 +274,7 @@ class CastleGameUI:
 
                 # DEBUG
                 elif e.key == K_SPACE:
-                    cmd = CastleGameCommand.Build(CastleGameCommand.Build.HOUSE, 0, 0)
+                    cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.HOUSE, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)
 
         # Ticking

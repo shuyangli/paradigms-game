@@ -156,7 +156,7 @@ class BoardGrid(pygame.sprite.Sprite):
         surface.blit(self.image, self.rect)
         # draw building
         if self.building is not None:
-            self.building.draw(surface)
+            surface.blit(self.building.image, self.building.rect)
 
     def _set_owner(self, owner):
         self.owners = [owner]
@@ -192,13 +192,8 @@ class Castle(pygame.sprite.Sprite):
         self.owner = player.pos
         self.grid = grid
         self.image = self.CASTLE_IMG[self.owner]
-
         self.rect = self.image.get_rect()
-        self.rect.centerx = self.grid.rect.centerx
-        self.rect.centery = self.grid.rect.centery
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
+        self.rect.center = self.grid.rect.center
 
     # =================
     # Ticking mechanism
@@ -208,6 +203,12 @@ class Castle(pygame.sprite.Sprite):
 
 
 class House(pygame.sprite.Sprite):
+    HOUSE_CYAN = pygame.image.load("assets/img/house-cyan.png")
+    HOUSE_PINK = pygame.image.load("assets/img/house-pink.png")
+    HOUSE_ORANGE = pygame.image.load("assets/img/house-orange.png")
+    HOUSE_PURPLE = pygame.image.load("assets/img/house-purple.png")
+    HOUSE_IMG = [HOUSE_PURPLE, HOUSE_PINK, HOUSE_CYAN, HOUSE_ORANGE]
+
     STATE_BUILDING = 0
     STATE_READY = 1
     STATE_COOLDOWN = 2
@@ -216,9 +217,17 @@ class House(pygame.sprite.Sprite):
     COUNT_COOLDOWN_TO_READY = 3 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
-    def __init__(self, game_player):
+    def __init__(self, player, grid):
         pygame.sprite.Sprite.__init__(self)
-        self.game_player = game_player
+
+        # Image
+        self.owner = player.pos
+        self.grid = grid
+        self.image = self.HOUSE_IMG[self.owner]
+        self.rect = self.image.get_rect()
+        self.rect.center = self.grid.rect.center
+
+        # State machine
         self.state = self.STATE_BUILDING
 
     # =================
@@ -265,6 +274,12 @@ class House(pygame.sprite.Sprite):
 
 
 class Tower(pygame.sprite.Sprite):
+    TOWER_CYAN = pygame.image.load("assets/img/tower-cyan.png")
+    TOWER_PINK = pygame.image.load("assets/img/tower-pink.png")
+    TOWER_ORANGE = pygame.image.load("assets/img/tower-orange.png")
+    TOWER_PURPLE = pygame.image.load("assets/img/tower-purple.png")
+    TOWER_IMG = [TOWER_PURPLE, TOWER_PINK, TOWER_CYAN, TOWER_ORANGE]
+
     STATE_BUILDING = 0
     STATE_READY = 1
     STATE_COOLDOWN = 2
@@ -273,9 +288,16 @@ class Tower(pygame.sprite.Sprite):
     COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
-    def __init__(self, game_player):
+    def __init__(self, player, grid):
         pygame.sprite.Sprite.__init__(self)
-        self.game_player = game_player
+
+        # Image
+        self.owner = player.pos
+        self.grid = grid
+        self.image = self.HOUSE_IMG[self.owner]
+        self.rect = self.image.get_rect()
+        self.rect.center = self.grid.rect.center
+
         self.state = self.STATE_BUILDING
 
     # =================
@@ -321,6 +343,12 @@ class Tower(pygame.sprite.Sprite):
 
 
 class Market(pygame.sprite.Sprite):
+    MARKET_CYAN = pygame.image.load("assets/img/market-cyan.png")
+    MARKET_PINK = pygame.image.load("assets/img/market-pink.png")
+    MARKET_ORANGE = pygame.image.load("assets/img/market-orange.png")
+    MARKET_PURPLE = pygame.image.load("assets/img/market-purple.png")
+    MARKET_IMG = [MARKET_PURPLE, MARKET_PINK, MARKET_CYAN, MARKET_ORANGE]
+
     STATE_BUILDING = 0
     STATE_READY = 1
 
@@ -329,9 +357,16 @@ class Market(pygame.sprite.Sprite):
 
     MONEY_INCREMENT = 5
 
-    def __init__(self, game_player):
+    def __init__(self, player, grid):
         pygame.sprite.Sprite.__init__(self)
-        self.game_player = game_player
+
+        # Image
+        self.owner = player.pos
+        self.grid = grid
+        self.image = self.HOUSE_IMG[self.owner]
+        self.rect = self.image.get_rect()
+        self.rect.center = self.grid.rect.center
+
         self.state = self.STATE_BUILDING
 
     # =================

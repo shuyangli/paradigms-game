@@ -14,21 +14,28 @@ class CastleGameCommand:
             "m": Market
         }
 
-        def __init__(self, building, x, y):
+        def __init__(self, player_pos, building, x, y):
+            self.player_pos = player_pos
             self.building = building
             self.x = x
             self.y = y
 
+        def __str__(self):
+            return "<Build>Player: {0}, Building: {1}, Position: {2}".format(self.player_pos, self.building, (self.x, self.y))
+
         def apply_to(self, game):
             # TODO
             print "[TODO] Build's apply_to called"
-            return
-            if game.board[self.y][self.x] == game.empty_square:
+            if game.board[self.y][self.x].building is None:
                 # build
-                game_board[self.y][self.x] = self.NAME_TO_CLS[self.building]()
+                player = [x for x in game.player_models if x.pos == self.player_pos][0]
+                new_building = self.NAME_TO_CLS[self.building](player, game.board[self.y][self.x])
+                game.board[self.y][self.x]._set_building(new_building)
 
         def serialize(self):
-            return "B{0}{1}{2}{3}{4}{5}".format(
+            return "B{0}{1}{2}{3}{4}{5}{6}{7}".format(
+                CastleGameCommand.CMD_SEPARATOR,
+                self.player_pos,
                 CastleGameCommand.CMD_SEPARATOR,
                 self.x,
                 CastleGameCommand.CMD_SEPARATOR,
@@ -39,8 +46,8 @@ class CastleGameCommand:
 
         @classmethod
         def deserialize(cls, encoded):
-            _, x, y, building = encoded.split(CastleGameCommand.CMD_SEPARATOR)
-            return cls(building, int(x), int(y))
+            _, player_pos, x, y, building = encoded.split(CastleGameCommand.CMD_SEPARATOR)
+            return cls(int(player_pos), building, int(x), int(y))
 
 
     class Destroy:
@@ -52,11 +59,11 @@ class CastleGameCommand:
             # TODO
             print "[TODO] Destroy's apply_to called"
             return
-            # destroy
-            game.board[self.y][self.x] = game.empty_square
 
         def serialize(self):
-            return "D{0}{1}{2}{3}".format(
+            return "D{0}{1}{2}{3}{4}{5}".format(
+                CastleGameCommand.CMD_SEPARATOR,
+                self.player_pos,
                 CastleGameCommand.CMD_SEPARATOR,
                 self.x,
                 CastleGameCommand.CMD_SEPARATOR,
@@ -65,8 +72,8 @@ class CastleGameCommand:
 
         @classmethod
         def deserialize(cls, encoded):
-            _, x, y = encoded.split(CastleGameCommand.CMD_SEPARATOR)
-            return cls(int(x), int(y))
+            _, player_pos, x, y = encoded.split(CastleGameCommand.CMD_SEPARATOR)
+            return cls(int(player_pos), int(x), int(y))
 
 
     class Route:
