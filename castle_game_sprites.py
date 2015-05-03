@@ -41,50 +41,55 @@ class Rect(pygame.sprite.Sprite):
         self.rect.centerx = (coord[0] + coord[1]) / 2
         self.rect.centery = (coord[2] + coord[3]) / 2
 
+    def set_color(self, color):
+        self.image.fill(color)
+
+
 class Cursor(pygame.sprite.Sprite):
-    def __init__(self, color, coord, width):
+    def __init__(self, color, rect, width=5):
         pygame.sprite.Sprite.__init__(self)
-        minx = coord[0]
-        maxx = coord[1]
-        miny = coord[2]
-        maxy = coord[3]
-        cursor_width = maxx - minx
-        cursor_height = maxy - miny
+        self.width = width
+        self.color = color
+        self.rect = rect
+        self.set_rect(rect)
+
+    def set_color(self, color):
+        self.color = color
+        self.set_rect(self.rect)
+
+    def set_rect(self, rect):
+        minx = rect.left
+        maxx = rect.right
+        miny = rect.top
+        maxy = rect.bottom
         cursor_coverage = 0.25 # the percentage of each size that the cursor covers
-        cursor_cover_width = cursor_coverage * cursor_width
-        cursor_cover_height = cursor_coverage * cursor_height
+        cursor_cover_width = cursor_coverage * rect.width
+        cursor_cover_height = cursor_coverage * rect.height
         rect_coords = [
-                        [minx - width, minx, miny - width, miny + cursor_coverage * cursor_height],
-                        [minx, minx + cursor_cover_width, miny - width, miny],
-                        [maxx - cursor_cover_width, maxx + width, miny - width, miny],
-                        [maxx, maxx + width, miny, miny + cursor_coverage * cursor_height],
-                        [maxx, maxx + width, maxy - cursor_coverage * cursor_height, maxy + width],
-                        [maxx - cursor_cover_width, maxx, maxy, maxy + width],
-                        [minx - width, minx + cursor_cover_width, maxy, maxy + width],
-                        [minx - width, minx, maxy - cursor_coverage * cursor_height, maxy]
+                        [minx - self.width, minx, miny - self.width, miny + cursor_coverage * rect.height],
+                        [minx, minx + cursor_cover_width, miny - self.width, miny],
+                        [maxx - cursor_cover_width, maxx + self.width, miny - self.width, miny],
+                        [maxx, maxx + self.width, miny, miny + cursor_coverage * rect.height],
+                        [maxx, maxx + self.width, maxy - cursor_coverage * rect.height, maxy + self.width],
+                        [maxx - cursor_cover_width, maxx, maxy, maxy + self.width],
+                        [minx - self.width, minx + cursor_cover_width, maxy, maxy + self.width],
+                        [minx - self.width, minx, maxy - cursor_coverage * rect.height, maxy]
                       ]
         self.images = []
         for rect_coord in rect_coords:
             w = int(round(rect_coord[1] - rect_coord[0]))
             h = int(round(rect_coord[3] - rect_coord[2]))
             new_image = pygame.Surface([w, h])
-            new_image.fill(color)
+            new_image.fill(self.color)
             new_rect = new_image.get_rect()
             new_rect.centerx = (rect_coord[0] + rect_coord[1]) / 2
             new_rect.centery = (rect_coord[2] + rect_coord[3]) / 2
-            self.images.append([new_image, new_rect])
+            self.images.append((new_image, new_rect))
 
-class BasicArrow(pygame.sprite.Sprite):
-    def __init__(self, game_ui, positions=None):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("assets/img/arrow-right.png")
-        self.image = pygame.transform.scale(self.image, (50, 50))
-        self.rect = self.image.get_rect()
-        self.positions = positions
-
-    def update_selection(self, selection):
-        self.rect.x = self.positions[selection][0]
-        self.rect.centery = self.positions[selection][1]
+        # draw onto image
+    def draw(self, surface):
+        for img, rect in self.images:
+            surface.blit(img, rect)
 
 
 class SelectionBox(pygame.sprite.Sprite):
@@ -101,15 +106,15 @@ class PlayerCastle(pygame.sprite.Sprite):
 
     CASTLE_IMG = [CASTLE_PURPLE, CASTLE_PINK, CASTLE_CYAN, CASTLE_ORANGE]
 
-    def __init__(self, pos, coord): # coord: (minx, maxx, miny, maxy)
+    def __init__(self, pos, rect):
         pygame.sprite.Sprite.__init__(self)
 
         self.pos = pos
-        self.w = int((coord[1] - coord[0]) * 0.8)
-        self.h = int((coord[3] - coord[2]) * 0.8)
+        self.w = int(rect.width * 0.8)
+        self.h = int(rect.height * 0.8)
         self.rect = self.image.get_rect()
-        self.rect.centerx = (coord[0] + coord[1]) / 2
-        self.rect.centery = (coord[2] + coord[3]) / 2
+        self.rect.centerx = rect.centerx
+        self.rect.centery = rect.centery
 
     @property
     def image(self):
