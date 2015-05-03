@@ -93,6 +93,29 @@ class SelectionBox(pygame.sprite.Sprite):
         self.image = pygame.Surface((0, 0)) # default surface
         self.rect = self.image.get_rect()
 
+class PlayerCastle(pygame.sprite.Sprite):
+    CASTLE_CYAN = pygame.image.load("assets/img/castle-cyan-large.png")
+    CASTLE_PINK = pygame.image.load("assets/img/castle-pink-large.png")
+    CASTLE_ORANGE = pygame.image.load("assets/img/castle-orange-large.png")
+    CASTLE_PURPLE = pygame.image.load("assets/img/castle-purple-large.png")
+
+    CASTLE_IMG = [CASTLE_PURPLE, CASTLE_PINK, CASTLE_CYAN, CASTLE_ORANGE]
+
+    def __init__(self, pos, coord): # coord: (minx, maxx, miny, maxy)
+        pygame.sprite.Sprite.__init__(self)
+
+        self.pos = pos
+        self.w = int((coord[1] - coord[0]) * 0.8)
+        self.h = int((coord[3] - coord[2]) * 0.8)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = (coord[0] + coord[1]) / 2
+        self.rect.centery = (coord[2] + coord[3]) / 2
+
+    @property
+    def image(self):
+        return pygame.transform.scale(self.CASTLE_IMG[self.pos], (self.w, self.h))
+
+
 # =======================
 # Sprites for actual game
 # =======================
@@ -150,16 +173,9 @@ class BoardGrid(pygame.sprite.Sprite):
     def image(self):
         return self.GROUND_IMG[self.owner]
 
-
 class Castle(pygame.sprite.Sprite):
-    def __init__(self, image_path, coord): # coord: (minx, maxx, miny, maxy)
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(image_path)
-        self.image = pygame.transform.scale(self.image,
-            (coord[1] - coord[0], coord[3] - coord[2]))
-        self.rect = self.image.get_rect()
-        self.rect.centerx = (coord[0] + coord[1]) / 2
-        self.rect.centery = (coord[2] + coord[3]) / 2
+    def __init__(self):
+        pass
 
 class House(pygame.sprite.Sprite):
     STATE_BUILDING = 0

@@ -178,6 +178,7 @@ class CastleGameModel:
             player = CastleGamePlayerModel(PLAYER_ORANGE, self.board[self.HEIGHT-1][0])
             self.player_models.append(player)
 
+
     def prepare_game(self, client):
         pass
 
