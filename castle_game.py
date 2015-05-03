@@ -143,6 +143,15 @@ class CastleGameModel:
 
     def __init__(self):
         self.board = [[BoardGrid(x, y) for x in range(self.WIDTH)] for y in range(self.HEIGHT)]
+
+        # Set default owners
+        for i in range(3):
+            for j in range(3):
+                self.board[i][j]._set_owner(PLAYER_PURPLE)
+                self.board[self.WIDTH-1-i][j]._set_owner(PLAYER_PINK)
+                self.board[self.WIDTH-1-i][self.HEIGHT-1-j]._set_owner(PLAYER_CYAN)
+                self.board[i][self.HEIGHT-1-j]._set_owner(PLAYER_ORANGE)
+
         self.player_models = []
 
     def prepare_game(self, client):
