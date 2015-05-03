@@ -155,7 +155,7 @@ class CastleClient:
         self.conn.sendStateChange(self.current_state)
 
     def change_state_start_game(self):
-        self.game_model.prepare_game(self)
+        self.game_ui.start_game(self.taken_positions, self.own_position)
         self.current_state = self.GAME_STATE_PLAYING
         self.conn.sendStateChange(self.current_state)
 

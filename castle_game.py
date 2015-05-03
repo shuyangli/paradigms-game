@@ -141,7 +141,7 @@ class CastleGameModel:
     WIDTH = 8
     HEIGHT = 8
 
-    def __init__(self):
+    def __init__(self, all_players_pos, current_player_pos):
         self.board = [[BoardGrid(x, y) for x in range(self.WIDTH)] for y in range(self.HEIGHT)]
 
         # Set default owners
@@ -163,6 +163,7 @@ class CastleGameModel:
             player.update()
 
     def draw(self, surface):
+        # actual drawing
         for row in self.board:
             for cell in row:
                 cell.draw(surface)

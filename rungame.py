@@ -2,6 +2,11 @@ import argparse
 from castle_client import CastleClient
 from castle_game_ui import CastleGameUI
 
+class FakeConnection:
+    def sendStateChange(self, *args, **kwargs): pass
+    def sendCommandDict(self, *args, **kwargs): pass
+
+
 if __name__ == '__main__':
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Castles game.")
@@ -20,7 +25,9 @@ if __name__ == '__main__':
 
     if args.testdraw:
         client.current_state = client.GAME_STATE_PLAYING
+        client.taken_positions = [1]
+        client.own_position = 1
+        client.conn = FakeConnection()
+        client.change_state_start_game()
 
-    # DEBUG
-    game_ui.start_game()
     client.connect()

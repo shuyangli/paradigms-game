@@ -98,8 +98,8 @@ class CastleGameUI:
     # ===================
     # Starting a new game
     # ===================
-    def start_game(self):
-        self.game_model = CastleGameModel()
+    def start_game(self, all_players_pos, current_player_pos):
+        self.game_model = CastleGameModel(all_players_pos, current_player_pos)
         self.client.set_game_model(self.game_model)
 
     def end_game(self):
