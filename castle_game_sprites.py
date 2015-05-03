@@ -156,7 +156,7 @@ class BoardGrid(pygame.sprite.Sprite):
         surface.blit(self.image, self.rect)
         # draw building
         if self.building is not None:
-            surface.blit(self.building.image, self.rect)
+            self.building.draw(surface)
 
     def _set_owner(self, owner):
         self.owners = [owner]
@@ -194,9 +194,11 @@ class Castle(pygame.sprite.Sprite):
         self.image = self.CASTLE_IMG[self.owner]
 
         self.rect = self.image.get_rect()
-        self.rect.center = self.grid.rect.center
-        print self.rect
-        print self.grid.rect
+        self.rect.centerx = self.grid.rect.centerx
+        self.rect.centery = self.grid.rect.centery
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
 
     # =================
     # Ticking mechanism
