@@ -10,10 +10,12 @@ import json
 
 class CastleServerProtocol(LineReceiver):
     PAYLOAD_TYPE_COMMAND = "cmd"
-    PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
-    PAYLOAD_TYPE_ALL_POSITION = "allpos"
-    PAYLOAD_TYPE_SELECT_POSITION = "selpos"
-    PAYLOAD_TYPE_ERROR = "error"
+    PAYLOAD_TYPE_STATE_CHANGE = "cs"
+    PAYLOAD_TYPE_ALL_POSITION = "ap"
+    PAYLOAD_TYPE_SELECT_POSITION = "sp"
+    PAYLOAD_TYPE_LOCKSTEP_FINISH = "lks"
+    PAYLOAD_TYPE_LOCKSTEP_ALLOW = "lka"
+    PAYLOAD_TYPE_ERROR = "err"
 
     def __init__(self, server):
         self.server = server
@@ -56,13 +58,13 @@ class CastleServerProtocol(LineReceiver):
 
     def sendPosition(self):
         all_positions = [i for i, conn in enumerate(self.server.player_pos) if conn != None]
-        own_position = None
+        self.own_position = None
         if self in self.server.player_pos:
-            own_position = self.server.player_pos.index(self)
+            self.own_position = self.server.player_pos.index(self)
 
         # position: {"type": "allpos", "ownpos": ownpos, "allpos": [allpos]}
         payload_dict = {"type": self.PAYLOAD_TYPE_ALL_POSITION,
-                        "ownpos": own_position,
+                        "ownpos": self.own_position,
                         "allpos": all_positions}
         payload = json.dumps(payload_dict)
         if DEBUG: self.__logDumpPayload(payload_dict)
@@ -73,6 +75,13 @@ class CastleServerProtocol(LineReceiver):
         payload = json.dumps(payload_dict)
         if DEBUG: self.__logDumpPayload(payload_dict)
         self.sendLine(payload)
+
+    def sendAllowLockstep(self, step):
+        payload_dict = {"type": self.PAYLOAD_TYPE_LOCKSTEP_ALLOW, "step": step}
+        payload = json.dumps(payload_dict)
+        if DEBUG: self.__logDumpPayload(payload_dict)
+        self.sendLine(payload)
+
 
     # ==============================
     # Passive action (line received)
@@ -103,6 +112,15 @@ class CastleServerProtocol(LineReceiver):
             else:
                 self.sendPosition()
 
+        elif ddict["type"] == self.PAYLOAD_TYEP_LOCKSTEP_FINISH:
+            # lockstep finish: {"type": "lkf", "step": lockstep}
+            self.server.player_step[self.own_position] = ddict["step"]
+            for step in self.server.player_step:
+                if step is not None and step < ddict["step"]:
+                    return
+            self.server.allowed_step = ddict["step"] + 2
+            self.server.broadcast_allow_lockstep()
+
 
 class CastleServerProtocolFactory(Factory):
     def __init__(self, castle_server):
@@ -131,6 +149,9 @@ class CastleServer:
         self.player_states = {}     # {conn: state}
         self.player_pos = [None, None, None, None] # [conns]
 
+        self.player_step = [None, None, None, None] # [steps]
+        self.allowed_step = 2
+
         global DEBUG
         DEBUG = debug
 
@@ -154,7 +175,10 @@ class CastleServer:
             if player in self.player_pos:
                 original_pos = self.player_pos.index(player)
                 self.player_pos[original_pos] = None
+                self.player_step[original_pos] = None
                 self.broadcast_position()
+            if len(self.players) == 0:
+                self.allowed_step = 2
 
     def __logDumpPayload(self, payload):
         print "[INFO] Broadcast msg: {0}".format(payload)
@@ -208,3 +232,7 @@ class CastleServer:
     def broadcast_ready(self):
         for player in self.players:
             player.sendState(self.GAME_STATE_PLAYING)
+
+    def broadcast_allow_lockstep(self):
+        for player in self.players:
+            player.sendAllowLockstep(self.allowed_step)

@@ -9,11 +9,6 @@ from castle_game_sprites import *
 class CastleGameUI:
     """UI class for Castle game."""
 
-    # 10 game frames per lockstep, 6 locksteps per second
-    # Realistically this would change based on network latency
-    GAME_FRAMES_PER_LOCK_STEP = 10
-    game_frame_id = 0
-
     # screen size
     SCREEN_SIZE = (800, 600)
     FONT_NAME = None
@@ -243,19 +238,6 @@ class CastleGameUI:
     # Actual game ticking
     # ===================
     def ui_tick_game(self):
-        # First process lockstep stuff
-        if self.game_frame_id == 0:
-            # Every first game frame, we advance the lock step
-            if not self.client.tick_lock_step():
-                # If we failed to tick lockstep, make sure we try to tick again
-                self.game_frame_id -= 1
-
-        # Increment game frame
-        self.game_frame_id += 1
-        if self.game_frame_id >= self.GAME_FRAMES_PER_LOCK_STEP:
-            self.game_frame_id = 0
-
-        # Then handle regular game stuff
         # Process events
         for e in pygame.event.get():
             if e.type == KEYDOWN:
@@ -272,9 +254,14 @@ class CastleGameUI:
                     self.cursor_y = (self.cursor_y + 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
 
-                # DEBUG
-                elif e.key == K_SPACE:
+                elif e.key == K_a:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.HOUSE, self.cursor_x, self.cursor_y)
+                    self.client.queue_command(cmd)
+                elif e.key == K_s:
+                    cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.MARKET, self.cursor_x, self.cursor_y)
+                    self.client.queue_command(cmd)
+                elif e.key == K_d:
+                    cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.TOWER, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)
 
         # Ticking
