@@ -6,15 +6,18 @@ from twisted.internet import reactor, defer
 from castle_game import CastleGameCommand, CastleGameModel
 
 import json     # For serializing dicts
+import time     # time
 import sys      # exit
 
 
 class CastleClientProtocol(LineReceiver):
     PAYLOAD_TYPE_COMMAND = "cmd"
-    PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
-    PAYLOAD_TYPE_ALL_POSITION = "allpos"
-    PAYLOAD_TYPE_SELECT_POSITION = "selpos"
-    PAYLOAD_TYPE_ERROR = "error"
+    PAYLOAD_TYPE_STATE_CHANGE = "cs"
+    PAYLOAD_TYPE_ALL_POSITION = "ap"
+    PAYLOAD_TYPE_SELECT_POSITION = "sp"
+    PAYLOAD_TYPE_LOCKSTEP_FINISH = "lkf"
+    PAYLOAD_TYPE_LOCKSTEP_ALLOW = "lka"
+    PAYLOAD_TYPE_ERROR = "err"
 
     def __init__(self, client):
         self.client = client
@@ -34,7 +37,7 @@ class CastleClientProtocol(LineReceiver):
         if DEBUG: self.__logDumpLine(ddict)
 
         if ddict["type"] == self.PAYLOAD_TYPE_ERROR:
-            # error: {"type": "error", "info": info}
+            # error: {"type": "err", "info": info}
             pass
 
         elif ddict["type"] == self.PAYLOAD_TYPE_COMMAND:
@@ -44,14 +47,18 @@ class CastleClientProtocol(LineReceiver):
             self.client.receive_game_command(cmd_dict)
 
         elif ddict["type"] == self.PAYLOAD_TYPE_STATE_CHANGE:
-            # state change: {"type": "chgstate", "state": state}
+            # state change: {"type": "cs", "state": state}
             # DEBUG
             if ddict["state"] == self.client.GAME_STATE_PLAYING:
                 self.client.change_state_start_game()
 
         elif ddict["type"] == self.PAYLOAD_TYPE_ALL_POSITION:
-            # all position: {"type": allpos, "ownpos": ownpos, "allpos": [pos]}
+            # all position: {"type": "ap", "ownpos": ownpos, "allpos": [pos]}
             self.client.receive_pos(ddict["ownpos"], ddict["allpos"])
+
+        elif ddict["type"] == self.PAYLOAD_TYPE_LOCKSTEP_ALLOW:
+            # allow lockstep: {"type": "lka", "step": lockstep}
+            self.client.receive_allowed_lockstep(ddict["step"])
 
     def sendCommandDict(self, cmd_dict):
         # cmd_dict: {"turn": turn, "command": cmd}
@@ -64,7 +71,7 @@ class CastleClientProtocol(LineReceiver):
         self.sendLine(payload)
 
     def sendPosSelection(self, pos):
-        # select position: {"type": "selpos", "pos": pos}
+        # select position: {"type": "sp", "pos": pos}
         pos_dict = {"type": self.PAYLOAD_TYPE_SELECT_POSITION,
                     "pos": pos}
         payload = json.dumps(pos_dict)
@@ -72,11 +79,19 @@ class CastleClientProtocol(LineReceiver):
         self.sendLine(payload)
 
     def sendStateChange(self, state):
-        # state change: {"type": "chgstate", "state": state}
+        # state change: {"type": "cs", "state": state}
         change_dict = {"type": self.PAYLOAD_TYPE_STATE_CHANGE,
                        "state": state}
         payload = json.dumps(change_dict)
         if DEBUG: self.__logDumpPayload(change_dict)
+        self.sendLine(payload)
+
+    def sendLockstepFinish(self, lockstep):
+        # lockstep finish: {"type": "lkf", "step": lockstep}
+        step_dict = {"type": self.PAYLOAD_TYPE_LOCKSTEP_FINISH,
+                     "step": lockstep}
+        payload = json.dumps(step_dict)
+        if DEBUG: self.__logDumpPayload(payload)
         self.sendLine(payload)
 
     def __logDumpPayload(self, payload):
@@ -100,6 +115,10 @@ class CastleClient:
     """Castle game client class."""
     # FPS requested
     DESIRED_FPS = 60.0
+
+    # 10 game frames per lockstep, 6 locksteps per second
+    # Realistically this would change based on network latency
+    GAME_FRAMES_PER_LOCK_STEP = 5
 
     # Game states
     GAME_STATE_WAITING = 0
@@ -160,6 +179,14 @@ class CastleClient:
         self.current_state = self.GAME_STATE_PLAYING
         self.conn.sendStateChange(self.current_state)
 
+        self.game_frame_id = 0
+        self.allowed_lockstep = 2
+
+        # DEBUG
+        if DEBUG:
+            self.last_time_lockstep = time.time()
+            self.last_time_ui = time.time()
+
     def change_state_end_game(self):
         self.current_state = self.GAME_STATE_MENU
         self.conn.sendStateChange(self.current_state)
@@ -173,6 +200,9 @@ class CastleClient:
     def receive_pos(self, ownpos, allpos):
         self.own_position = ownpos
         self.taken_positions = allpos
+
+    def receive_allowed_lockstep(self, step):
+        self.allowed_lockstep = step
 
     # =====================
     # Game command handling
@@ -198,6 +228,10 @@ class CastleClient:
         # Called every lock step, simulate actual game
         # Check if it's ready first, and return false if it's not ready to advance
         self.lock_step_id += 1
+        if self.lock_step_id >= self.allowed_lockstep:
+            self.lock_step_id -= 1
+            return False
+
         if DEBUG: print "[INFO][TICK] {0}".format(self.lock_step_id)
 
         for cmd in self.ready_commands:
@@ -207,6 +241,14 @@ class CastleClient:
 
         # tick lock step for model
         self.game_model.tick_lock_step()
+
+        # TODO: message server to prevent desync
+
+        # DEBUG: fps
+        if DEBUG:
+            current_time = time.time()
+            print "[INFO] Lockstep FPS: {0}".format(1 / (current_time - self.last_time_lockstep))
+            self.last_time_lockstep = current_time
 
         return True
 
@@ -219,7 +261,26 @@ class CastleClient:
         elif self.current_state == self.GAME_STATE_READY:
             self.game_ui.ui_tick_ready()
         elif self.current_state == self.GAME_STATE_PLAYING:
+
+            # First process lockstep stuff
+            if self.game_frame_id == 0:
+                # Every first game frame, we advance the lock step
+                if not self.tick_lock_step():
+                    # If we failed to tick lockstep, make sure we try to tick again
+                    self.game_frame_id -= 1
+
+            # Increment game frame
+            self.game_frame_id += 1
+            if self.game_frame_id >= self.GAME_FRAMES_PER_LOCK_STEP:
+                self.game_frame_id = 0
+
             self.game_ui.ui_tick_game()
+
+            # DEBUG: fps
+            # if DEBUG:
+            #     current_time = time.time()
+            #     print "[INFO] UI FPS: {0}".format(1 / (current_time - self.last_time_ui))
+            #     self.last_time_ui = current_time
         else:
             # Something bad occured
             print "[ERROR] Invalid current state"

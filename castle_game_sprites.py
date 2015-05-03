@@ -294,7 +294,7 @@ class Tower(pygame.sprite.Sprite):
         # Image
         self.owner = player.pos
         self.grid = grid
-        self.image = self.HOUSE_IMG[self.owner]
+        self.image = self.TOWER_IMG[self.owner]
         self.rect = self.image.get_rect()
         self.rect.center = self.grid.rect.center
 
@@ -363,7 +363,7 @@ class Market(pygame.sprite.Sprite):
         # Image
         self.owner = player.pos
         self.grid = grid
-        self.image = self.HOUSE_IMG[self.owner]
+        self.image = self.MARKET_IMG[self.owner]
         self.rect = self.image.get_rect()
         self.rect.center = self.grid.rect.center
 
