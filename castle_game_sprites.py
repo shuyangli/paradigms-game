@@ -391,12 +391,28 @@ class Market(pygame.sprite.Sprite):
         self.game_player.money_increment -= self.MONEY_INCREMENT
 
 
+class Soldier(pygame.sprite.Sprite):
+    def __init__(self, game_model, game_player):
+        pygame.sprite.Sprite.__init__(self)
+
+
 class Path(pygame.sprite.Sprite):
     def __init__(self, game_model, game_player):
         pygame.sprite.Sprite.__init__(self)
         self.game_model = game_model
         self.game_player = game_player
-        self.sections = []
+        self.pathSections = []
+
+    def onWhichPathSection(self, soldier):
+        for pathSection in self.pathSections:
+            if pathSection.passesPoint(soldier.x, soldier.y):
+                return pathSection
+        return None
+
+    def whereToGo(self, soldier):
+        return None
+
+
 
 
 class PathSection(pygame.sprite.Sprite):
@@ -421,3 +437,9 @@ class PathSection(pygame.sprite.Sprite):
         self.next_from_start = []
         self.next_from_end = []
 
+    def doesConnectEnemyBuilding(self):
+        return False
+
+    def passesPoint(self, x, y):
+        return ((x == self.start_x and (y - self.start_y)*(y - self.end_y) <= 0) or
+            (y == self.start_y and (x - self.start_x)*(x - self.end_x) <= 0))
