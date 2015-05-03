@@ -13,7 +13,7 @@ class CastleServerProtocol(LineReceiver):
     PAYLOAD_TYPE_STATE_CHANGE = "cs"
     PAYLOAD_TYPE_ALL_POSITION = "ap"
     PAYLOAD_TYPE_SELECT_POSITION = "sp"
-    PAYLOAD_TYPE_LOCKSTEP_FINISH = "lks"
+    PAYLOAD_TYPE_LOCKSTEP_FINISH = "lkf"
     PAYLOAD_TYPE_LOCKSTEP_ALLOW = "lka"
     PAYLOAD_TYPE_ERROR = "err"
 
@@ -112,7 +112,7 @@ class CastleServerProtocol(LineReceiver):
             else:
                 self.sendPosition()
 
-        elif ddict["type"] == self.PAYLOAD_TYEP_LOCKSTEP_FINISH:
+        elif ddict["type"] == self.PAYLOAD_TYPE_LOCKSTEP_FINISH:
             # lockstep finish: {"type": "lkf", "step": lockstep}
             self.server.player_step[self.own_position] = ddict["step"]
             for step in self.server.player_step:

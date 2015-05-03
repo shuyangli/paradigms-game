@@ -242,7 +242,8 @@ class CastleClient:
         # tick lock step for model
         self.game_model.tick_lock_step()
 
-        # TODO: message server to prevent desync
+        # message server to prevent desync
+        self.conn.sendLockstepFinish(self.lock_step_id)
 
         # DEBUG: fps
         if DEBUG:
