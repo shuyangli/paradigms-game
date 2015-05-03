@@ -159,7 +159,7 @@ class CastleGameModel:
                 if PLAYER_PINK in all_players_pos:
                     self.board[i][self.WIDTH-1-j]._set_owner(PLAYER_PINK)
                 if PLAYER_CYAN in all_players_pos:
-                    self.board[self.HEIGHt-1-i][self.WIDTH-1-j]._set_owner(PLAYER_CYAN)
+                    self.board[self.HEIGHT-1-i][self.WIDTH-1-j]._set_owner(PLAYER_CYAN)
                 if PLAYER_ORANGE in all_players_pos:
                     self.board[self.HEIGHT-1-i][j]._set_owner(PLAYER_ORANGE)
 
