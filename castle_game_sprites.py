@@ -99,11 +99,11 @@ class SelectionBox(pygame.sprite.Sprite):
 GAME_FRAMES_PER_LOCK_STEP = 10
 
 class BoardGrid(pygame.sprite.Sprite):
-    GROUND_CYAN = pygame.image.load("assets/img/ground_cyan.png")
-    GROUND_PINK = pygame.image.load("assets/img/ground_pink.png")
-    GROUND_ORANGE = pygame.image.load("assets/img/ground_orange.png")
-    GROUND_PURPLE = pygame.image.load("assets/img/ground_purple.png")
-    GROUND_GREEN = pygame.image.load("assets/img/ground_green.png")
+    GROUND_CYAN = pygame.image.load("assets/img/ground-cyan.png")
+    GROUND_PINK = pygame.image.load("assets/img/ground-pink.png")
+    GROUND_ORANGE = pygame.image.load("assets/img/ground-orange.png")
+    GROUND_PURPLE = pygame.image.load("assets/img/ground-purple.png")
+    GROUND_GREEN = pygame.image.load("assets/img/ground-green.png")
 
     GROUND_IMG = [GROUND_PURPLE, GROUND_PINK, GROUND_CYAN, GROUND_ORANGE, GROUND_GREEN]
 
