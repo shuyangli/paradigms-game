@@ -397,10 +397,8 @@ class Soldier(pygame.sprite.Sprite):
 
 
 class Path(pygame.sprite.Sprite):
-    def __init__(self, game_model, game_player):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.game_model = game_model
-        self.game_player = game_player
         self.pathSections = []
 
     def onWhichPathSection(self, soldier):
@@ -416,10 +414,8 @@ class Path(pygame.sprite.Sprite):
 
 
 class PathSection(pygame.sprite.Sprite):
-    def __init__(self, game_model, game_player, color, start_x, start_y, end_x, end_y, width):
+    def __init__(self, color, start_x, start_y, end_x, end_y, width):
         pygame.sprite.Sprite.__init__(self)
-        self.game_model = game_model
-        self.game_player = game_player
         self.start_x = start_x
         self.start_y = start_y
         self.end_x = end_x
