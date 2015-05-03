@@ -161,7 +161,6 @@ class Castle(pygame.sprite.Sprite):
         self.rect.centerx = (coord[0] + coord[1]) / 2
         self.rect.centery = (coord[2] + coord[3]) / 2
 
-
 class House(pygame.sprite.Sprite):
     STATE_BUILDING = 0
     STATE_READY = 1
@@ -312,3 +311,37 @@ class Market(pygame.sprite.Sprite):
 
     def destroyed(self):
         self.game_player.money_increment -= self.MONEY_INCREMENT
+
+
+class Path(pygame.sprite.Sprite):
+    def __init__(self, game_model, game_player):
+        pygame.sprite.Sprite.__init__(self)
+
+
+class PathSection(pygame.sprite.Sprite):
+    def __init__(self, game_model, game_player, color, start_x, start_y, end_x, end_y, width):
+        pygame.sprite.Sprite.__init__(self)
+        self.game_model = game_model
+        self.game_player = game_player
+        self.start_x = start_x
+        self.start_y = start_y
+        self.end_x = end_x
+        self.end_y = end_y
+        self.image = pygame.Surface([coord[1] - coord[0], coord[3] - coord[2]])
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = (start_x + start_y) / 2
+        self.rect.centery = (end_x + end_y) / 2
+        self.next_from_start = []
+        self.next_from_end = []
+
+    def isStartOrEnd(self, x, y): # 0 means (x, y) is the start point, 1 means end, -1 means neither
+        if x == self.start_x and y == self.start_y: return 0
+        if x == self.end_x and y == self.end_y: return 1
+        return -1
+
+    def connectPathSection(self, path_section):
+        pass
+
+    def disconnectPathSection(self, path_section):
+        pass
