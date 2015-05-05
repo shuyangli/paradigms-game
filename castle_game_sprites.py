@@ -124,7 +124,7 @@ class PlayerCastle(pygame.sprite.Sprite):
 # =======================
 # Sprites for actual game
 # =======================
-GAME_FRAMES_PER_LOCK_STEP = 10
+GAME_FRAMES_PER_LOCK_STEP = 5
 
 class BoardGrid(pygame.sprite.Sprite):
     GROUND_CYAN = pygame.image.load("assets/img/ground-cyan.png")
