@@ -26,11 +26,16 @@ class CastleGameCommand:
         def apply_to(self, game):
             # TODO
             print "[TODO] Build's apply_to called"
-            if game.board[self.y][self.x].building is None:
+            if game.board[self.y][self.x].building is None and self.player_pos in game.board[self.y][self.x].owners:
                 # build
                 player = [x for x in game.player_models if x.pos == self.player_pos][0]
                 new_building = self.NAME_TO_CLS[self.building](player, game.board[self.y][self.x])
                 game.board[self.y][self.x]._set_building(new_building)
+
+                # add owner to grids around the current one
+                for grid in game.grids_surrounding(self.x, self.y):
+                    grid.owners.append(self.player_pos)
+
 
         def serialize(self):
             return "B{0}{1}{2}{3}{4}{5}{6}{7}".format(
@@ -208,3 +213,15 @@ class CastleGameModel:
         # called every lockstep
         for player in self.player_models:
             player.tick_lock_step()
+
+    # helpers
+    def grids_surrounding(self, cx, cy):
+        grids = []
+        for x in range(cx - 1, cx + 2):
+            for y in range(cy - 1, cy + 2):
+                try:
+                    if x >= 0 and y >= 0:
+                        grids.append(self.board[y][x])
+                except IndexError:
+                    pass
+        return grids
