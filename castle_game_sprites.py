@@ -496,6 +496,7 @@ class House(BasicBuilding):
 
     def destroyed(self):
         # TODO: Remove all soldiers
+        super(House, self).destroyed()
         pass
 
 
@@ -585,6 +586,7 @@ class Market(BasicBuilding):
                 self.player.money_increment += self.MONEY_INCREMENT
 
     def destroyed(self):
+        super(Market, self).destroyed()
         self.player.money_increment -= self.MONEY_INCREMENT
 
 
