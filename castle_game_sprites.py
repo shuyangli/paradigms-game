@@ -379,7 +379,7 @@ class House(BasicBuilding):
     COLOR_DARK_PINK = (192, 62, 62)
     COLOR_DARK_ORANGE = (200, 146, 37)
     COLOR_DARK_PURPLE = (118, 66, 200)
-    COLORS = [COLOR_DARK_CYAN, COLOR_DARK_PINK, COLOR_DARK_ORANGE, COLOR_DARK_PURPLE]
+    COLORS = [COLOR_DARK_PURPLE, COLOR_DARK_PINK, COLOR_DARK_CYAN, COLOR_DARK_ORANGE] # TODO: Weird color order
 
     ROUTE_UP = 1
     ROUTE_DOWN = 2
@@ -430,7 +430,6 @@ class House(BasicBuilding):
         if not self.isRouting and self.path != None: return
         if not self.isRouting:
             self.path = Path()
-            print self.path
             self.isRouting = True
             self.prev_x = 225 + 50 * x # TODO: change this so that it's not hard-coded
             self.prev_y = 75 + 50 * y
@@ -599,21 +598,16 @@ class PathSection(pygame.sprite.Sprite):
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        print "(", x1, ",", y1, "->", x2, ",", y2, ")"
 
         # drawing
         self.image = None
         if self.x1 == self.x2: # vertical
             self.image = pygame.Surface([width, abs(self.y2 - self.y1)])
-            print width, abs(self.y2 - self.y1)
         elif self.y1 == self.y2: # horizontal
             self.image = pygame.Surface([abs(self.x2 - self.x1), width])
-            print abs(self.x2 - self.x1), width
         else: return
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.centerx = (self.x1 + self.x2) / 2
         self.rect.centery = (self.y1 + self.y2) / 2
-        print self.rect.centerx, self.rect.centery
-
 

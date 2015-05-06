@@ -297,8 +297,6 @@ class CastleGameModel:
         for player in self.player_models:
             for building in player.buildings:
                 if hasattr(building, "path") and building.path != None:
-                    # print len(building.path.pathSections)
-                    
                     for pathSection in building.path.pathSections:
                         surface.blit(pathSection.image, pathSection.rect)
                     

@@ -289,22 +289,22 @@ class CastleGameUI:
         for e in pygame.event.get():
             if e.type == KEYDOWN:
                 if e.key == K_LEFT:
-                    self.cursor_x = (self.cursor_x - 1) % 8
+                    self.cursor_x = self.cursor_x - 1 if self.cursor_x != 0 else 0
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
                         self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_LEFT, 0, 0)
                 elif e.key == K_RIGHT:
-                    self.cursor_x = (self.cursor_x + 1) % 8
+                    self.cursor_x = self.cursor_x + 1 if self.cursor_x != 7 else 7
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
                         self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_RIGHT, 0, 0)
                 elif e.key == K_UP:
-                    self.cursor_y = (self.cursor_y - 1) % 8
+                    self.cursor_y = self.cursor_y - 1 if self.cursor_y != 0 else 0
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
                         self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_UP, 0, 0)
                 elif e.key == K_DOWN:
-                    self.cursor_y = (self.cursor_y + 1) % 8
+                    self.cursor_y = self.cursor_y + 1 if self.cursor_y != 7 else 7
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
                         self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_DOWN, 0, 0)
