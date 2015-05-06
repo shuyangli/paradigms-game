@@ -91,6 +91,12 @@ class CastleGameUI:
         self.cursor_y = 0
 
         screen_centerx = self.screen.get_rect().centerx
+
+        self.logo = pygame.image.load("assets/img/logo.png")
+        self.logo_rect = self.logo.get_rect()
+        self.logo_rect.centerx = screen_centerx
+        self.logo_rect.centery = 150
+
         play_label = BasicLabel("PLAY", self.font, self.COLOR_BLACK, centerx=screen_centerx, centery=375)
         instr_label = BasicLabel("INSTRUCTIONS", self.font, self.COLOR_BLACK, centerx=screen_centerx, centery=425)
         exit_label = BasicLabel("QUIT", self.font, self.COLOR_BLACK, centerx=screen_centerx, centery=475)
@@ -98,6 +104,11 @@ class CastleGameUI:
 
         self.cursor = Cursor(self.COLOR_RED, play_label.rect, width=4)
         self.cursor_pos_menu = [play_label.rect, instr_label.rect, exit_label.rect]
+
+
+    def transition_to_instructions(self):
+        screen_centerx = self.screen.get_rect().centerx
+        self.instr_screen = pygame.image.load("assets/img/instructions.png")
 
 
     def transition_to_waiting(self):
@@ -149,13 +160,12 @@ class CastleGameUI:
                 elif e.key == K_UP:
                     self.cursor_y -= 1
                     if self.cursor_y < 0: self.cursor_y = 0
-                elif e.key == K_SPACE:
+                elif e.key == K_SPACE or e.key == K_RETURN:
                     # Confirm selection
                     if self.cursor_y == 0:
                         self.client.change_state_waiting()
                     elif self.cursor_y == 1:
-                        # TODO: instructions
-                        pass
+                        self.client.change_state_instructions()
                     elif self.cursor_y == 2:
                         self.exit()
                         return
@@ -166,8 +176,20 @@ class CastleGameUI:
         self.cursor.set_rect(self.cursor_pos_menu[self.cursor_y])
 
         self.screen.fill(self.COLOR_WHITE)
+        self.screen.blit(self.logo, self.logo_rect)
         self.menu_label_group.draw(self.screen)
         self.cursor.draw(self.screen)
+        pygame.display.flip()
+
+    def ui_tick_instructions(self):
+        # Process events
+        for e in pygame.event.get():
+            if e.type == KEYDOWN:
+                self.client.change_state_menu()
+
+        # Drawing
+        self.screen.fill(self.COLOR_WHITE)
+        self.screen.blit(self.instr_screen, self.instr_screen.get_rect())
         pygame.display.flip()
 
     def ui_tick_waiting(self):
@@ -185,7 +207,7 @@ class CastleGameUI:
                 elif e.key == K_RIGHT:
                     if self.cursor_y == 0:
                         self.cursor_x = (self.cursor_x + 1) % 4
-                elif e.key == K_SPACE:
+                elif e.key == K_SPACE or e.key == K_RETURN:
                     if self.cursor_y == 0:
                         self.client.select_pos(self.cursor_x)
                     elif self.cursor_y == 1:
@@ -218,6 +240,8 @@ class CastleGameUI:
             self.cursor.set_rect(self.ready_rect.rect)
         self.cursor.draw(self.screen)
 
+        # Draw logo
+        self.screen.blit(self.logo, self.logo_rect)
         pygame.display.flip()
 
     def ui_tick_ready(self):
@@ -240,6 +264,8 @@ class CastleGameUI:
 
         self.screen.blit(self.waiting_label.image, self.waiting_label.rect)
 
+        # Draw logo
+        self.screen.blit(self.logo, self.logo_rect)
         pygame.display.flip()
 
 
@@ -280,7 +306,7 @@ class CastleGameUI:
                 elif e.key == K_d:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.TOWER, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)
-                elif e.key == K_SPACE:
+                elif e.key == K_SPACE or e.key == K_RETURN:
                     if not self.isRouting:
                         self.game_model.board[self.y][self.x].building.route()
 

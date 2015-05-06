@@ -126,6 +126,8 @@ class CastleClient:
     GAME_STATE_PLAYING = 2
     GAME_STATE_MENU    = 3
 
+    GAME_STATE_INSTRUCTIONS = 4
+
     # For synchronized ticking mechanism
     lock_step_id = 0
 
@@ -161,6 +163,14 @@ class CastleClient:
     # ==================
     # Game state changes
     # ==================
+    def change_state_menu(self):
+        self.game_ui.transition_to_menu()
+        self.current_state = self.GAME_STATE_MENU
+
+    def change_state_instructions(self):
+        self.game_ui.transition_to_instructions()
+        self.current_state = self.GAME_STATE_INSTRUCTIONS
+
     def change_state_waiting(self):
         self.own_position = None
         self.taken_positions = []
@@ -257,6 +267,8 @@ class CastleClient:
         # Dispatcher for UI tick
         if self.current_state == self.GAME_STATE_MENU:
             self.game_ui.ui_tick_menu()
+        elif self.current_state == self.GAME_STATE_INSTRUCTIONS:
+            self.game_ui.ui_tick_instructions()
         elif self.current_state == self.GAME_STATE_WAITING:
             self.game_ui.ui_tick_waiting()
         elif self.current_state == self.GAME_STATE_READY:
