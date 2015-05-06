@@ -415,6 +415,9 @@ class House(BasicBuilding):
         self.dir_list = [] # list of directions
         self.color = self.COLORS[player.pos]
 
+        self.soldiers = []
+
+
     def reload_path_from_dimensions(self, path_dim):
         self.path = Path()
         for section in path_dim:
@@ -665,6 +668,8 @@ class Soldier(pygame.sprite.Sprite):
         self.current_y = self.house.rect.centery
 
         self.damage = self.DEFAULT_DAMAGE
+
+        self.house.soldiers.append(self)
         self.player.soldiers.append(self)
 
     # Movement per UI frame
@@ -701,6 +706,7 @@ class Soldier(pygame.sprite.Sprite):
     # Events
     # ======
     def die(self):
+        self.house.soldiers.remove(self)
         self.player.soldiers.remove(self)
 
 
