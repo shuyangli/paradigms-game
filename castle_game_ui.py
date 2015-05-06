@@ -124,6 +124,8 @@ class CastleGameUI:
 
         self.cursor = Cursor(self.PLAYER_COLOR_DARK[self.client.own_position], self.game_model.board[self.cursor_y][self.cursor_x].rect)
 
+        self.game_instr_label = InstructionLabel(self.client.own_position, self.screen.get_rect().centerx, 525)
+
     # ===============================
     # Ticking mechanism
     # These are called every UI frame
@@ -272,6 +274,6 @@ class CastleGameUI:
         self.screen.fill(self.COLOR_WHITE)
         self.game_model.draw(self.screen)
         self.cursor.draw(self.screen)
-        # TODO: draw instructions
+        self.screen.blit(self.game_instr_label.image, self.game_instr_label.rect)
 
         pygame.display.flip()

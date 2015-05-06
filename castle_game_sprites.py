@@ -121,6 +121,65 @@ class PlayerCastle(pygame.sprite.Sprite):
         return pygame.transform.scale(self.CASTLE_IMG[self.pos], (self.w, self.h))
 
 
+class InstructionLabel(pygame.sprite.Sprite):
+    FONT_NAME = None
+    FONT_SIZE = 26
+    LABEL_COLORS = [(118, 66, 200), (192, 62, 62), (39, 190, 173), (200, 146, 37)]
+
+    def __init__(self, pos, centerx, centery):
+        pygame.sprite.Sprite.__init__(self)
+
+        label_font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
+        label_color = self.LABEL_COLORS[pos]
+
+        # Positioning
+        house_img = House.HOUSE_IMG[pos]
+        house_rect = house_img.get_rect()
+        house_rect.left = 0
+        house_rect.centery = 30
+
+        market_img = Market.MARKET_IMG[pos]
+        market_rect = market_img.get_rect()
+        market_rect.centery = 30
+
+        tower_img = Tower.TOWER_IMG[pos]
+        tower_rect = tower_img.get_rect()
+        tower_rect.centery = 30
+
+        left = house_img.get_rect().width + 10
+        house_key = BasicLabel("'a': House", label_font, label_color, topleft=(left, 0))
+        house_money = BasicLabel("$100", label_font, label_color, topleft=(left, 30))
+
+        left += house_key.rect.width + 10
+        market_rect.left = left
+        left += market_img.get_rect().width + 10
+        market_key = BasicLabel("'s': Market", label_font, label_color, topleft=(left, 0))
+        market_money = BasicLabel("$50", label_font, label_color, topleft=(left, 30))
+
+        left += market_key.rect.width + 10
+        tower_rect.left = left
+        left += tower_img.get_rect().width + 10
+        tower_key = BasicLabel("'d': Tower", label_font, label_color, topleft=(left, 0))
+        tower_money = BasicLabel("$100", label_font, label_color, topleft=(left, 30))
+
+        left += tower_key.rect.width
+
+        self.image = pygame.Surface((left, 60), pygame.SRCALPHA, 32).convert_alpha()
+        self.image.blit(house_img, house_rect)
+        self.image.blit(house_key.image, house_key.rect)
+        self.image.blit(house_money.image, house_money.rect)
+        self.image.blit(market_img, market_rect)
+        self.image.blit(market_key.image, market_key.rect)
+        self.image.blit(market_money.image, market_money.rect)
+        self.image.blit(tower_img, tower_rect)
+        self.image.blit(tower_key.image, tower_key.rect)
+        self.image.blit(tower_money.image, tower_money.rect)
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx = centerx
+        self.rect.centery = centery
+
+
 # =======================
 # Sprites for actual game
 # =======================
@@ -462,4 +521,4 @@ class PathSection(pygame.sprite.Sprite):
         self.rect.centerx = (self.x1 + self.x2) / 2
         self.rect.centery = (self.y1 + self.y2) / 2
 
-    
+
