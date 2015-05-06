@@ -353,9 +353,9 @@ class BasicBuilding(pygame.sprite.Sprite):
             rotated_rect.center = base_rect.center
             img.blit(rotated, rotated_rect)
 
-        # if self.hp < self.max_hp:
-        #     # hp not full, we also blit a hp bar
-
+        if self.hp < self.max_hp:
+            # TODO: hp not full, we also blit a hp bar
+            pass
 
         return img
 
@@ -364,7 +364,7 @@ class BasicBuilding(pygame.sprite.Sprite):
         return self._rect
 
 
-class Castle(pygame.sprite.Sprite):
+class Castle(BasicBuilding):
     CASTLE_CYAN = pygame.image.load("assets/img/castle-cyan.png")
     CASTLE_PINK = pygame.image.load("assets/img/castle-pink.png")
     CASTLE_ORANGE = pygame.image.load("assets/img/castle-orange.png")
@@ -372,13 +372,8 @@ class Castle(pygame.sprite.Sprite):
     CASTLE_IMG = [CASTLE_PURPLE, CASTLE_PINK, CASTLE_CYAN, CASTLE_ORANGE]
 
     def __init__(self, game, player, grid):
-        self.owner = player.pos
-        self.player = player
-        self.game = game
-        self.grid = grid
-        self.image = self.CASTLE_IMG[self.owner]
-        self.rect = self.image.get_rect()
-        self.rect.center = self.grid.rect.center
+        BasicBuilding.__init__(self, game, player, self.CASTLE_IMG[player.pos], grid, max_hp=200)
+        self.state = self.STATE_READY
 
     # =================
     # Ticking mechanism
