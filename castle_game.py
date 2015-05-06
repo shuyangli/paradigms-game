@@ -1,4 +1,5 @@
 from castle_game_sprites import *
+import time
 
 class CastleGameCommand:
     """Wrapper class for game commands and command deserializer."""
@@ -109,8 +110,8 @@ class CastleGamePlayerModel:
     INITIAL_MONEY = 0
     INITIAL_MONEY_INCREMENT = 5
 
-    GAME_FRAMES_PER_LOCK_STEP = 10
-    step_count = 0
+    last_time = 0
+    acc_time = 0
 
     def __init__(self, pos, castle_grid, buildings=[], soldiers=[]):
         # TODO: clean this up
@@ -132,6 +133,9 @@ class CastleGamePlayerModel:
         # called when the player is defeated
         pass
 
+    def add_building(self, building):
+        self.buildings.append(building)
+
     # =================
     # Ticking mechanism
     # =================
@@ -143,12 +147,16 @@ class CastleGamePlayerModel:
             soldier.update()
 
     def tick_lock_step(self):
-        self.step_count += 1
-
-        if self.step_count >= self.GAME_FRAMES_PER_LOCK_STEP:
-            # update every second
-            self.step_count = 0
-            self.money += self.money_increment
+        # update money every second
+        current_time = time.time()
+        if self.last_time == 0:
+            self.last_time = current_time
+        else:
+            self.acc_time += current_time - self.last_time
+            self.last_time = current_time
+            while self.acc_time >= 1.0:
+                self.acc_time -= 1.0
+                self.money += self.money_increment
 
         for building in self.buildings:
             building.tick_lock_step()
