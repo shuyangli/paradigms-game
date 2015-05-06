@@ -325,12 +325,10 @@ class BasicBuilding(pygame.sprite.Sprite):
     def hit_by_soldier(self, soldier):
         if soldier.player.pos != self.owner:
             # cause damange if the building and the soldier are different
+            soldier.die()
             self.hp -= soldier.damage
             if self.hp < 0:
                 self.destroyed()
-
-        # but kill the soldier anyways
-        soldier.die()
 
     @property
     def image(self):
@@ -434,7 +432,7 @@ class House(BasicBuilding):
                 self.step_count = 0
                 self.state = self.STATE_READY
 
-        elif self.state == self.STATE_READY:
+        elif self.state == self.STATE_READY and self.path is not None:
             self.train_soldier()
 
             # transition
@@ -652,6 +650,9 @@ class Soldier(pygame.sprite.Sprite):
         self.current_x = self.house.rect.centerx
         self.current_y = self.house.rect.centery
 
+        self.player.soldiers.append(self)
+        print "Player soldiers: ", self.player.soldiers
+
     # Movement per UI frame
     def update(self):
         # TODO: get current destination: (x, y)
@@ -679,11 +680,16 @@ class Soldier(pygame.sprite.Sprite):
             # hit building
             current_grid.building.hit_by_soldier(self)
 
+    def tick_lock_step(self):
+        pass
+
     # ======
     # Events
     # ======
     def die(self):
         # TODO: make it disappear
+        print "Soldier's die called"
+        self.player.soldiers.remove(self)
         pass
 
 
@@ -712,6 +718,10 @@ class Path(pygame.sprite.Sprite):
 
     def setDestination(self, enemy_building):
         self.destination = enemy_building
+
+    def next_destination(self, soldier_x, soldier_y):
+        # TODO: return an actual destination in coordinates (x, y)
+        return None
 
 
 class PathSection(pygame.sprite.Sprite):
