@@ -322,8 +322,8 @@ class CastleGameModel:
         return grids
 
     def grid_for_coordinates(self, x, y):
-        x_grid = (x - 200) // 50
-        y_grid = (y - 50) // 50
+        x_grid = int((x - 200) // 50)
+        y_grid = int((y - 50) // 50)
         if x_grid >= 0 and x_grid < 8 and y_grid >= 0 and y_grid < 8:
             return self.board[y_grid][x_grid]
         else:

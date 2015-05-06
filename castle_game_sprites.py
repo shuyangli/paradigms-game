@@ -388,7 +388,7 @@ class House(BasicBuilding):
     HOUSE_IMG = [HOUSE_PURPLE, HOUSE_PINK, HOUSE_CYAN, HOUSE_ORANGE]
 
     COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
-    COUNT_COOLDOWN_TO_READY = 3 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
     COLOR_DARK_CYAN = (39, 190, 173)
@@ -528,7 +528,7 @@ class House(BasicBuilding):
 
     def train_soldier(self):
         # TODO: Create a soldier
-        pass
+        soldier = Soldier(self, self.game, self.player)
 
     def destroyed(self):
         # TODO: Remove all soldiers
@@ -548,7 +548,7 @@ class Tower(BasicBuilding):
     STATE_COOLDOWN = 2
 
     COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
-    COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_COOLDOWN_TO_READY = 9 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
     def __init__(self, game, player, grid):
@@ -636,6 +636,7 @@ class Soldier(pygame.sprite.Sprite):
 
     SPEED = 2
 
+    DEFAULT_DAMAGE = 20
 
     def __init__(self, house, game, player):
         pygame.sprite.Sprite.__init__(self)
@@ -650,13 +651,13 @@ class Soldier(pygame.sprite.Sprite):
         self.current_x = self.house.rect.centerx
         self.current_y = self.house.rect.centery
 
+        self.damage = self.DEFAULT_DAMAGE
         self.player.soldiers.append(self)
-        print "Player soldiers: ", self.player.soldiers
 
     # Movement per UI frame
     def update(self):
         # TODO: get current destination: (x, y)
-        destination = (None, None)
+        destination = self.house.path.next_destination(self.current_x, self.current_y)
 
         if destination is not None:
             # move towards destination
@@ -687,10 +688,7 @@ class Soldier(pygame.sprite.Sprite):
     # Events
     # ======
     def die(self):
-        # TODO: make it disappear
-        print "Soldier's die called"
         self.player.soldiers.remove(self)
-        pass
 
 
     @property
@@ -721,6 +719,10 @@ class Path(pygame.sprite.Sprite):
 
     def next_destination(self, soldier_x, soldier_y):
         # TODO: return an actual destination in coordinates (x, y)
+        for section in self.pathSections:
+            if section.contains_point(soldier_x, soldier_y):
+                return (section.x2, section.y2)
+
         return None
 
 
@@ -743,4 +745,18 @@ class PathSection(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centerx = (self.x1 + self.x2) / 2
         self.rect.centery = (self.y1 + self.y2) / 2
+
+    def contains_point(self, x, y):
+        if self.x1 == self.x2:
+            # vertical
+            if self.y2 > self.y1:
+                return abs(self.x1 - x) <= 2 and self.y1 <= y < self.y2
+            else:
+                return abs(self.x1 - x) <= 2 and self.y2 < y <= self.y1
+        else:
+            # horizontal
+            if self.x2 > self.x1:
+                return abs(self.y1 - y) <= 2 and self.x1 <= x < self.x2
+            else:
+                return abs(self.y1 - y) <= 2 and self.x2 < x <= self.x1
 
