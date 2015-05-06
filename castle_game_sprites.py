@@ -52,7 +52,6 @@ class Cursor(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.width = width
         self.color = color
-        self._canonical_rect = rect
         self.set_rect(rect)
 
         self._frame_count = 0
@@ -74,14 +73,14 @@ class Cursor(pygame.sprite.Sprite):
 
         # (x, y, w, h)
         rect_coords = [(minx, miny, self.width, border_height),
-                        (minx, maxy - border_height, self.width, border_height),
+                        (minx, maxy + self.width - border_height, self.width, border_height),
                         (maxx, miny, self.width, border_height),
-                        (maxx, maxy - border_height, self.width, border_height),
+                        (maxx, maxy + self.width - border_height, self.width, border_height),
 
                         (minx, miny, border_length, self.width),
                         (maxx + self.width - border_length, miny, border_length, self.width),
-                        (minx, maxy - self.width, border_length, self.width),
-                        (maxx + self.width - border_length, maxy - self.width, border_length, self.width)]
+                        (minx, maxy, border_length, self.width),
+                        (maxx + self.width - border_length, maxy, border_length, self.width)]
 
         for (x, y, w, h) in rect_coords:
             new_image = pygame.Surface((w, h))
@@ -91,7 +90,8 @@ class Cursor(pygame.sprite.Sprite):
             new_image_rect.top = y
             self._image.blit(new_image, new_image_rect)
 
-        self._center = rect.center
+        self._canonical_rect = self._image.get_rect()
+        self._canonical_rect.center = rect.center
 
     def update(self):
         self._frame_count = (self._frame_count + 1) % self.ANIMATION_PERIOD
@@ -100,19 +100,18 @@ class Cursor(pygame.sprite.Sprite):
     def image(self):
         scale_factor = 1.0
         if self._frame_count < 10:
-            scale_factor = 1.0 + 0.01 * self._frame_count
+            scale_factor = 0.95 + 0.01 * self._frame_count
         else:
-            scale_factor = 1.2 - 0.01 * self._frame_count
+            scale_factor = 1.15 - 0.01 * self._frame_count
 
         new_image = pygame.transform.scale(self._image, (int(self._canonical_rect.width * scale_factor), int(self._canonical_rect.height * scale_factor)))
         self._rect = new_image.get_rect()
-        self._rect.center = self._center
+        self._rect.center = self._canonical_rect.center
         return new_image
 
     @property
     def rect(self):
         return self._rect
-
 
     # draw onto image
     def draw(self, surface):
@@ -392,7 +391,7 @@ class House(BasicBuilding):
         self.isRouting = False
         self.prev_dir = 0 # when the path is first created, no direction
         self.prev_x = None # default of the end point of previous route
-        self.prev_y = None 
+        self.prev_y = None
         self.path = None
         self.color = self.COLORS[player.pos]
 
@@ -435,7 +434,7 @@ class House(BasicBuilding):
             self.isRouting = True
             self.prev_x = 225 + 50 * x # TODO: change this so that it's not hard-coded
             self.prev_y = 75 + 50 * y
-        else:    
+        else:
             # TODO: check boundaries
             if direction == self.ROUTE_UP:
                 if self.prev_dir == self.ROUTE_DOWN:
@@ -469,7 +468,7 @@ class House(BasicBuilding):
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
-                else:  
+                else:
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
                     self.prev_x = self.prev_x + 50
                     self.path.pushBackPathSection(new_path)

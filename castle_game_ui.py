@@ -323,8 +323,8 @@ class CastleGameUI:
                         try:
                             self.game_model.board[self.cursor_y][self.cursor_x].building.route(0, self.cursor_x, self.cursor_y)
                             self.route_from_x = self.cursor_x
-                            self.route_from_y = self.cursor_y 
-                            self.isRouting = True          
+                            self.route_from_y = self.cursor_y
+                            self.isRouting = True
                         except Exception, e:
                             print "You should route from your houses."
 
