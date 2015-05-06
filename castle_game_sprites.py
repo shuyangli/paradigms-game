@@ -385,6 +385,7 @@ class House(BasicBuilding):
     ROUTE_DOWN = 2
     ROUTE_LEFT = 3
     ROUTE_RIGHT = 4
+    ROUTE_CANCEL = 5
 
     def __init__(self, player, grid):
         BasicBuilding.__init__(self, player, self.HOUSE_IMG[player.pos], grid)
@@ -436,6 +437,14 @@ class House(BasicBuilding):
             self.dir_list.append(0)
         else:
             # TODO: check boundaries
+            if direction == self.ROUTE_CANCEL:
+                self.path = None
+                self.prev_x = None
+                self.prev_y = None
+                self.dir_list = []
+                self.isRouting = False
+                return
+            if 225 + 50 * x == self.prev_x and 75 + 50 * y == self.prev_y: return
             if direction == self.ROUTE_UP:
                 if self.dir_list[-1] == self.ROUTE_DOWN:
                     self.prev_x = self.path.pathSections[-1].x1
