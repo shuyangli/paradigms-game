@@ -228,6 +228,9 @@ class BoardGrid(pygame.sprite.Sprite):
         self.owners = []
         self.building = None
 
+        self.x = x
+        self.y = y
+
         left = self.X_OFFSET + self.WIDTH * x + (self.WIDTH - self.TRUE_WIDTH) / 2
         top = self.Y_OFFSET + self.HEIGHT * y + (self.HEIGHT - self.TRUE_HEIGHT) / 2
         self.rect = pygame.Rect(left, top, self.TRUE_WIDTH, self.TRUE_HEIGHT)
