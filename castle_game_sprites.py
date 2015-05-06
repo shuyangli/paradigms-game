@@ -197,8 +197,9 @@ class BasicBuilding(pygame.sprite.Sprite):
     COUNT_COOLDOWN_TO_READY = 3
 
     MAX_HP = 100
+    DEFAULT_PRICE = 100
 
-    def __init__(self, player, _image, grid, max_hp=None):
+    def __init__(self, player, _image, grid, max_hp=None, price=None):
         pygame.sprite.Sprite.__init__(self)
         self.player = player
         self._image = _image
@@ -214,11 +215,12 @@ class BasicBuilding(pygame.sprite.Sprite):
             self.max_hp = self.MAX_HP
         else:
             self.max_hp = max_hp
+
+        if price is None:
+            self.price = self.DEFAULT_PRICE
+        else:
+            self.price = price
         self.state = self.STATE_BUILDING
-
-        # Add to player
-        self.player.add_building(self)
-
 
     def update(self):
         # called every ui frame for animation
@@ -400,7 +402,7 @@ class Market(BasicBuilding):
     MONEY_INCREMENT = 5
 
     def __init__(self, player, grid):
-        BasicBuilding.__init__(self, player, self.MARKET_IMG[player.pos], grid)
+        BasicBuilding.__init__(self, player, self.MARKET_IMG[player.pos], grid, price=50)
 
     # =================
     # Ticking mechanism

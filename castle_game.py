@@ -27,11 +27,18 @@ class CastleGameCommand:
         def apply_to(self, game):
             # TODO
             print "[TODO] Build's apply_to called"
-            if game.board[self.y][self.x].building is None and self.player_pos in game.board[self.y][self.x].owners:
+            player = [x for x in game.player_models if x.pos == self.player_pos][0]
+            new_building = self.NAME_TO_CLS[self.building](player, game.board[self.y][self.x])
+
+            # Test building criteria
+            pred_no_building = (game.board[self.y][self.x].building is None)
+            pred_grid_owner = (self.player_pos in game.board[self.y][self.x].owners)
+            pred_enough_money = (player.money >= new_building.price)
+            if pred_no_building and pred_grid_owner and pred_enough_money:
                 # build
-                player = [x for x in game.player_models if x.pos == self.player_pos][0]
-                new_building = self.NAME_TO_CLS[self.building](player, game.board[self.y][self.x])
                 game.board[self.y][self.x]._set_building(new_building)
+                player.add_building(new_building)
+                player.money -= new_building.price
 
                 # add owner to grids around the current one
                 for grid in game.grids_surrounding(self.x, self.y):
