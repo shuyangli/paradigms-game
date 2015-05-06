@@ -456,7 +456,7 @@ class PathSection(pygame.sprite.Sprite):
             self.image = pygame.Surface([width, abs(self.end_y - self.start_y)])
         elif self.start_y == self.end_y: # horizontal
             self.image = pygame.Surface([abs(self.end_x - self.start_x), width])
-        else return
+        else: return
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.centerx = (self.x1 + self.x2) / 2
