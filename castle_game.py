@@ -101,6 +101,13 @@ class CastleGameCommand:
         def apply_to(self, game):
             # TODO
             print "[TODO] Route's apply_to called"
+            player = [x for x in game.player_models if x.pos == self.player_pos][0]
+
+            try:
+                game.board[self.y][self.x].building.route()
+            except Exception, e:
+                print "Routing failed."
+
             return
 
         def serialize(self):

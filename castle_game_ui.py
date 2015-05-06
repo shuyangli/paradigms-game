@@ -125,6 +125,7 @@ class CastleGameUI:
         self.cursor = Cursor(self.PLAYER_COLOR_DARK[self.client.own_position], self.game_model.board[self.cursor_y][self.cursor_x].rect)
 
         self.game_instr_label = InstructionLabel(self.client.own_position, self.screen.get_rect().centerx, 525)
+        self.isRouting = False  # determine if the user is routing
 
     # ===============================
     # Ticking mechanism

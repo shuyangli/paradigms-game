@@ -351,6 +351,8 @@ class House(BasicBuilding):
 
     def __init__(self, player, grid):
         BasicBuilding.__init__(self, player, self.HOUSE_IMG[player.pos], grid)
+        self.isRouting = False
+        self.path = None
 
     # =================
     # Ticking mechanism
@@ -383,6 +385,15 @@ class House(BasicBuilding):
     # ======
     # Events
     # ======
+    def route(self):
+        if self.path != None: return
+        if not self.isRouting:
+            self.path = Path()
+            self.isRouting = True
+            return
+
+
+
     def train_soldier(self):
         pass
 
