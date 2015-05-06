@@ -399,8 +399,9 @@ class Soldier(pygame.sprite.Sprite):
 class Path(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+        self.destination = None
         self.pathSections = []
-
+"""
     def onWhichPathSection(self, soldier):
         for pathSection in self.pathSections:
             if pathSection.passesPoint(soldier.x, soldier.y):
@@ -409,9 +410,7 @@ class Path(pygame.sprite.Sprite):
 
     def whereToGo(self, soldier):
         return None
-
-
-
+"""
 
 class PathSection(pygame.sprite.Sprite):
     def __init__(self, color, start_x, start_y, end_x, end_y, width):
