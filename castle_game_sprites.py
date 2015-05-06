@@ -408,6 +408,8 @@ class House(BasicBuilding):
         self.isRouting = False
         self.prev_x = None # default of the end point of previous route
         self.prev_y = None
+        self.x = None # stores the locatio
+        self.y = None
         self.path = None
         self.path_dim = [] # used for pickling of the path object
         self.dir_list = [] # list of directions
@@ -450,80 +452,91 @@ class House(BasicBuilding):
     # ======
     # Events
     # ======
-    def route(self, direction, x, y): # TODO: reformat this stupid function
-        if not self.isRouting:
-            self.path = Path()
+    def route(self, direction, x, y): # x, y is the current cursor location in terms of grids
+        if not self.isRouting: # starts routing, so 
             self.isRouting = True
-            self.prev_x = 225 + 50 * x # TODO: change this so that it's not hard-coded
-            self.prev_y = 75 + 50 * y
-            self.dir_list = [ 0 ]
+            self.path = Path()
+            self.x = 225 + 50 * x 
+            self.y = 75 + 50 * y
+            self.prev_x = self.x
+            self.prev_y = self.y
+            self.dir_list = []
             self.path_dim = []
-        else:
-            if direction == self.ROUTE_CANCEL:
-                self.path = None
-                self.path_dim = []
-                self.prev_x = None
-                self.prev_y = None
-                self.dir_list = []
-                self.isRouting = False
-                return
-            if 225 + 50 * x == self.prev_x and 75 + 50 * y == self.prev_y: return # check boundaries
-            if direction == self.ROUTE_UP:
-                if self.dir_list[-1] == self.ROUTE_DOWN:
+            return
+        
+        if direction == self.ROUTE_CANCEL:
+            self.isRouting = False
+            self.path = None
+            self.prev_x = self.x
+            self.prev_y = self.y
+            self.path_dim = []
+            self.dir_list = []
+            return
+
+        if 225 + 50 * x == self.prev_x and 75 + 50 * y == self.prev_y: # check bounds
+            return 
+
+        if direction == self.ROUTE_UP:
+            if self.dir_list and self.dir_list[-1] == self.ROUTE_DOWN:
+                if self.path.pathSections:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
-                    self.path_dim.pop(-1)
-                    self.dir_list.pop(-1)
-                else:
-                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4))
-                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4)
-                    self.prev_y = self.prev_y - 50
-                    self.path.pushBackPathSection(new_path)
-                    self.dir_list.append(direction)
-            elif direction == self.ROUTE_DOWN:
-                if self.dir_list[-1] == self.ROUTE_UP:
+                if self.path_dim: self.path_dim.pop(-1)
+                self.dir_list.pop(-1)
+            else:
+                self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4))
+                new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4)
+                self.prev_y = self.prev_y - 50
+                self.path.pushBackPathSection(new_path)
+                self.dir_list.append(direction)
+        elif direction == self.ROUTE_DOWN:
+            if self.dir_list and self.dir_list[-1] == self.ROUTE_UP:
+                if self.path.pathSections:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
-                    self.path_dim.pop(-1)
-                    self.dir_list.pop(-1)
-                else:
-                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4))
-                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4)
-                    self.prev_y = self.prev_y + 50
-                    self.path.pushBackPathSection(new_path)
-                    self.dir_list.append(direction)
-            elif direction == self.ROUTE_LEFT:
-                if self.dir_list[-1] == self.ROUTE_RIGHT:
+                if self.path_dim: self.path_dim.pop(-1)
+                self.dir_list.pop(-1)
+            else:
+                self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4))
+                new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4)
+                self.prev_y = self.prev_y + 50
+                self.path.pushBackPathSection(new_path)
+                self.dir_list.append(direction)
+        elif direction == self.ROUTE_LEFT:
+            if self.dir_list and self.dir_list[-1] == self.ROUTE_RIGHT:
+                if self.path.pathSections:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
-                    self.path_dim.pop(-1)
-                    self.dir_list.pop(-1)
-                else:
-                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4))
-                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4)
-                    self.prev_x = self.prev_x - 50
-                    self.path.pushBackPathSection(new_path)
-                    self.dir_list.append(direction)
-            elif direction == self.ROUTE_RIGHT:
-                if self.dir_list[-1] == self.ROUTE_LEFT:
+                if self.path_dim: self.path_dim.pop(-1)
+                self.dir_list.pop(-1)
+            else:
+                self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4))
+                new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4)
+                self.prev_x = self.prev_x - 50
+                self.path.pushBackPathSection(new_path)
+                self.dir_list.append(direction)
+        elif direction == self.ROUTE_RIGHT:
+            if self.dir_list and self.dir_list[-1] == self.ROUTE_LEFT:
+                if self.path.pathSections:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
-                    self.path_dim.pop(-1)
-                    self.dir_list.pop(-1)
-                else:
-                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4))
-                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
-                    self.prev_x = self.prev_x + 50
-                    self.path.pushBackPathSection(new_path)
-                    self.dir_list.append(direction)
-            building_at_new_pos = self.game.grid_for_coordinates(self.prev_x, self.prev_y).building
-            if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player.pos):
-                self.isRouting = False
-                self.path.destination = building_at_new_pos
+                if self.path_dim: self.path_dim.pop(-1)
+                self.dir_list.pop(-1)
+            else:
+                self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4))
+                new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
+                self.prev_x = self.prev_x + 50
+                self.path.pushBackPathSection(new_path)
+                self.dir_list.append(direction)
+        building_at_new_pos = self.game.grid_for_coordinates(self.prev_x, self.prev_y).building
+        if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player.pos):
+            self.isRouting = False
+            self.path.destination = building_at_new_pos
+            self.dir_list = []
 
 
     def train_soldier(self):
