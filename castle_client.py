@@ -166,6 +166,7 @@ class CastleClient:
     def change_state_menu(self):
         self.game_ui.transition_to_menu()
         self.current_state = self.GAME_STATE_MENU
+        self.conn.sendStateChange(self.current_state)
 
     def change_state_instructions(self):
         self.game_ui.transition_to_instructions()
