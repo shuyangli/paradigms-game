@@ -58,38 +58,45 @@ class Cursor(pygame.sprite.Sprite):
         self.set_rect(self.rect)
 
     def set_rect(self, rect):
-        minx = rect.left
-        maxx = rect.right
-        miny = rect.top
-        maxy = rect.bottom
+        minx = 0
+        maxx = rect.width + self.width
+        miny = 0
+        maxy = rect.height + self.width
         cursor_coverage = 0.25 # the percentage of each size that the cursor covers
-        cursor_cover_width = cursor_coverage * rect.width
-        cursor_cover_height = cursor_coverage * rect.height
-        rect_coords = [
-            [minx - self.width, minx, miny - self.width, miny + cursor_coverage * rect.height],
-            [minx, minx + cursor_cover_width, miny - self.width, miny],
-            [maxx - cursor_cover_width, maxx + self.width, miny - self.width, miny],
-            [maxx, maxx + self.width, miny, miny + cursor_coverage * rect.height],
-            [maxx, maxx + self.width, maxy - cursor_coverage * rect.height, maxy + self.width],
-            [maxx - cursor_cover_width, maxx, maxy, maxy + self.width],
-            [minx - self.width, minx + cursor_cover_width, maxy, maxy + self.width],
-            [minx - self.width, minx, maxy - cursor_coverage * rect.height, maxy]
-                      ]
-        self.images = []
-        for rect_coord in rect_coords:
-            w = int(round(rect_coord[1] - rect_coord[0]))
-            h = int(round(rect_coord[3] - rect_coord[2]))
-            new_image = pygame.Surface([w, h])
-            new_image.fill(self.color)
-            new_rect = new_image.get_rect()
-            new_rect.centerx = (rect_coord[0] + rect_coord[1]) / 2
-            new_rect.centery = (rect_coord[2] + rect_coord[3]) / 2
-            self.images.append((new_image, new_rect))
+        border_length = round(cursor_coverage * rect.width + self.width)
+        border_height = round(cursor_coverage * rect.height + self.width)
 
-        # draw onto image
+        self._image = pygame.Surface((rect.width + 2 * self.width, rect.height + 2 * self.width), pygame.SRCALPHA, 32).convert_alpha()
+
+        # (x, y, w, h)
+        rect_coords = [(minx, miny, self.width, border_height),
+                        (minx, maxy - border_height, self.width, border_height),
+                        (maxx, miny, self.width, border_height),
+                        (maxx, maxy - border_height, self.width, border_height),
+
+                        (minx, miny, border_length, self.width),
+                        (maxx + self.width - border_length, miny, border_length, self.width),
+                        (minx, maxy - self.width, border_length, self.width),
+                        (maxx + self.width - border_length, maxy - self.width, border_length, self.width)]
+
+        for (x, y, w, h) in rect_coords:
+            new_image = pygame.Surface((w, h))
+            new_image.fill(self.color)
+            new_image_rect = new_image.get_rect()
+            new_image_rect.left = x
+            new_image_rect.top = y
+            self._image.blit(new_image, new_image_rect)
+
+        self.rect = self._image.get_rect()
+        self.rect.center = rect.center
+
+    @property
+    def image(self):
+        return self._image
+
+    # draw onto image
     def draw(self, surface):
-        for img, rect in self.images:
-            surface.blit(img, rect)
+        surface.blit(self.image, self.rect)
 
 
 class SelectionBox(pygame.sprite.Sprite):
@@ -136,30 +143,30 @@ class InstructionLabel(pygame.sprite.Sprite):
         house_img = House.HOUSE_IMG[pos]
         house_rect = house_img.get_rect()
         house_rect.left = 0
-        house_rect.centery = 30
+        house_rect.centery = 26
 
         market_img = Market.MARKET_IMG[pos]
         market_rect = market_img.get_rect()
-        market_rect.centery = 30
+        market_rect.centery = 26
 
         tower_img = Tower.TOWER_IMG[pos]
         tower_rect = tower_img.get_rect()
-        tower_rect.centery = 30
+        tower_rect.centery = 26
 
         left = house_img.get_rect().width + 10
-        house_key = BasicLabel("'a': House", label_font, label_color, topleft=(left, 0))
+        house_key = BasicLabel("a: House", label_font, label_color, topleft=(left, 0))
         house_money = BasicLabel("$100", label_font, label_color, topleft=(left, 30))
 
         left += house_key.rect.width + 10
         market_rect.left = left
         left += market_img.get_rect().width + 10
-        market_key = BasicLabel("'s': Market", label_font, label_color, topleft=(left, 0))
+        market_key = BasicLabel("s: Market", label_font, label_color, topleft=(left, 0))
         market_money = BasicLabel("$50", label_font, label_color, topleft=(left, 30))
 
         left += market_key.rect.width + 10
         tower_rect.left = left
         left += tower_img.get_rect().width + 10
-        tower_key = BasicLabel("'d': Tower", label_font, label_color, topleft=(left, 0))
+        tower_key = BasicLabel("d: Tower", label_font, label_color, topleft=(left, 0))
         tower_money = BasicLabel("$100", label_font, label_color, topleft=(left, 30))
 
         left += tower_key.rect.width
