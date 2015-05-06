@@ -55,14 +55,19 @@ class CastleGameUI:
 
     def init_pygame(self):
         pygame.init()
+        pygame.mixer.init(frequency=44100, size=16, channels=2, buffer=65536)
         self.screen = pygame.display.set_mode(self.SCREEN_SIZE)
         self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
+
+        pygame.mixer.music.load("assets/sound/ice-cream-sandwich.ogg")
+        pygame.mixer.music.play(-1, 0.0)
 
 
     def set_client(self, client):
         self.client = client
 
     def exit(self):
+        pygame.mixer.music.stop()
         pygame.quit()
         self.client.exit()
 
