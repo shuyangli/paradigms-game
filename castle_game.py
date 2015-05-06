@@ -105,6 +105,7 @@ class CastleGameCommand:
 
             try:
                 game.board[self.y][self.x].building.route()
+                
             except Exception, e:
                 print "Routing failed."
 

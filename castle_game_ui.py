@@ -131,6 +131,9 @@ class CastleGameUI:
 
         self.game_instr_label = InstructionLabel(self.client.own_position, self.screen.get_rect().centerx, 525)
         self.isRouting = False  # determine if the user is routing
+        self.route_from_x = None  # coordinate of the house you are routing from
+        self.route_from_y = None
+        self.player_model = [x for x in self.game_model.player_models if x.pos == self.client.own_position][0]
 
     # ===============================
     # Ticking mechanism
@@ -250,15 +253,23 @@ class CastleGameUI:
                 if e.key == K_LEFT:
                     self.cursor_x = (self.cursor_x - 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+                    if self.isRouting:
+                        pass
                 elif e.key == K_RIGHT:
                     self.cursor_x = (self.cursor_x + 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+                    if self.isRouting:
+                        pass
                 elif e.key == K_UP:
                     self.cursor_y = (self.cursor_y - 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+                    if self.isRouting:
+                        pass
                 elif e.key == K_DOWN:
                     self.cursor_y = (self.cursor_y + 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
+                    if self.isRouting:
+                        pass
 
                 elif e.key == K_a:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.HOUSE, self.cursor_x, self.cursor_y)
@@ -270,8 +281,8 @@ class CastleGameUI:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.TOWER, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)
                 elif e.key == K_SPACE:
-                    cmd = CastleGameCommand.Route(self.client.own_position, self.cursor_x, self.cursor_y)
-                    self.client.queue_command(cmd)
+                    if not self.isRouting:
+                        self.game_model.board[self.y][self.x].building.route()
 
         # Ticking
         self.game_model.tick_ui()
