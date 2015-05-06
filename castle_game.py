@@ -106,12 +106,19 @@ class CastleGameCommand:
 class CastleGamePlayerModel:
     """Castle game player class."""
 
+    # Label drawing
+    LABEL_LOCS = [(190, 50), (610, 50), (610, 450), (190, 450)]
+    LABEL_COLORS = [(118, 66, 200), (192, 62, 62), (39, 190, 173), (200, 146, 37)]
+
     # Default value
     INITIAL_MONEY = 0
     INITIAL_MONEY_INCREMENT = 5
 
     last_time = 0
     acc_time = 0
+
+    FONT_NAME = None
+    FONT_SIZE = 26
 
     def __init__(self, pos, castle_grid, buildings=[], soldiers=[]):
         # TODO: clean this up
@@ -128,6 +135,9 @@ class CastleGamePlayerModel:
 
         self.money = self.INITIAL_MONEY
         self.money_increment = self.INITIAL_MONEY_INCREMENT
+
+        # Labels
+        self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
 
     def destroy(self):
         # called when the player is defeated
@@ -162,6 +172,35 @@ class CastleGamePlayerModel:
             building.tick_lock_step()
         for soldier in self.soldiers:
             soldier.tick_lock_step()
+
+    # =============
+    # Label drawing
+    # =============
+    def draw(self, surface):
+        label_color = self.LABEL_COLORS[self.pos]
+        label_loc = self.LABEL_LOCS[self.pos]
+
+        money_text = "${0}".format(self.money)
+        inc_text = "${0} / second".format(self.money_increment)
+        money_label = None
+        inc_label = None
+
+        if self.pos == 0 or self.pos == 3:
+            # topright align
+            money_label = BasicLabel(money_text, self.font, label_color, topright=label_loc)
+            inc_label_loc = (label_loc[0], label_loc[1] + money_label.rect.height)
+            inc_label = BasicLabel(inc_text, self.font, label_color, topright=inc_label_loc)
+
+        elif self.pos == 1 or self.pos == 2:
+            # topleft align
+            money_label = BasicLabel(money_text, self.font, label_color, topleft=label_loc)
+            inc_label_loc = (label_loc[0], label_loc[1] + money_label.rect.height)
+            inc_label = BasicLabel(inc_text, self.font, label_color, topleft=inc_label_loc)
+
+        surface.blit(money_label.image, money_label.rect)
+        surface.blit(inc_label.image, inc_label.rect)
+
+
 
 
 class CastleGameModel:
@@ -213,9 +252,14 @@ class CastleGameModel:
 
     def draw(self, surface):
         # actual drawing
+        # draw board
         for row in self.board:
             for cell in row:
                 cell.draw(surface)
+
+        # draw user labels
+        for player in self.player_models:
+            player.draw(surface)
 
     def tick_lock_step(self):
         # called every lockstep

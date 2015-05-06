@@ -20,9 +20,16 @@ class BasicLabel(pygame.sprite.Sprite):
         # process kwargs
         if "centerx" in kwargs:
             self.rect.centerx = kwargs["centerx"]
-
         if "centery" in kwargs:
             self.rect.centery = kwargs["centery"]
+        if "topright" in kwargs:
+            self.rect.topright = kwargs["topright"]
+        if "topleft" in kwargs:
+            self.rect.topleft = kwargs["topleft"]
+        if "bottomright" in kwargs:
+            self.rect.bottomright = kwargs["bottomright"]
+        if "bottomleft" in kwargs:
+            self.rect.bottomleft = kwargs["bottomleft"]
 
 
 class Rect(pygame.sprite.Sprite):
@@ -193,10 +200,14 @@ class BasicBuilding(pygame.sprite.Sprite):
 
     def __init__(self, player, _image, grid, max_hp=None):
         pygame.sprite.Sprite.__init__(self)
+        self.player = player
         self._image = _image
         self._hammer_image = self.HAMMER_IMG[player.pos]
         self._rect = self._image.get_rect()
         self._rect.center = grid.rect.center
+        self._ui_frame_count = 0
+
+        self.owner = player.pos
 
         # Game data
         if max_hp is None:
@@ -206,14 +217,14 @@ class BasicBuilding(pygame.sprite.Sprite):
         self.state = self.STATE_BUILDING
 
         # Add to player
-        player.add_building(self)
+        self.player.add_building(self)
 
 
     def update(self):
         # called every ui frame for animation
-        self.ui_frame_count += 1
-        if self.ui_frame_count >= 28:
-            self.ui_frame_count = 0
+        self._ui_frame_count += 1
+        if self._ui_frame_count >= 28:
+            self._ui_frame_count = 0
 
     def tick_lock_step(self):
         pass
@@ -230,10 +241,10 @@ class BasicBuilding(pygame.sprite.Sprite):
         if self.state == self.STATE_BUILDING:
             # building state, we also blit a hammer
             rotated = None
-            if self.ui_frame_count >= 14:
-                rotated = pygame.transform.rotate(self._hammer_image, 98 - self.ui_frame_count * 3.5)
+            if self._ui_frame_count >= 14:
+                rotated = pygame.transform.rotate(self._hammer_image, 98 - self._ui_frame_count * 3.5)
             else:
-                rotated = pygame.transform.rotate(self._hammer_image, self.ui_frame_count * 3.5)
+                rotated = pygame.transform.rotate(self._hammer_image, self._ui_frame_count * 3.5)
 
             rotated_rect = rotated.get_rect()
             rotated_rect.center = base_rect.center
@@ -278,8 +289,6 @@ class House(BasicBuilding):
     COUNT_COOLDOWN_TO_READY = 3
     step_count = 0
 
-    ui_frame_count = 0
-
     def __init__(self, player, grid):
         BasicBuilding.__init__(self, player, self.HOUSE_IMG[player.pos], grid)
 
@@ -322,7 +331,6 @@ class House(BasicBuilding):
         pass
 
 
-
 class Tower(BasicBuilding):
     TOWER_CYAN = pygame.image.load("assets/img/tower-cyan.png")
     TOWER_PINK = pygame.image.load("assets/img/tower-pink.png")
@@ -348,6 +356,7 @@ class Tower(BasicBuilding):
         # called every lockstep for game logic
         if self.state == self.STATE_BUILDING:
             # count states
+            self.step_count += 1
             if self.step_count == self.COUNT_BUILDING_TO_READY:
                 # transition
                 self.step_count = 0
@@ -375,7 +384,7 @@ class Tower(BasicBuilding):
         return False
 
 
-class Market(pygame.sprite.Sprite):
+class Market(BasicBuilding):
     MARKET_CYAN = pygame.image.load("assets/img/market-cyan.png")
     MARKET_PINK = pygame.image.load("assets/img/market-pink.png")
     MARKET_ORANGE = pygame.image.load("assets/img/market-orange.png")
@@ -385,7 +394,7 @@ class Market(pygame.sprite.Sprite):
     STATE_BUILDING = 0
     STATE_READY = 1
 
-    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_BUILDING_TO_READY = 5
     step_count = 0
 
     MONEY_INCREMENT = 5
@@ -400,14 +409,15 @@ class Market(pygame.sprite.Sprite):
         # called every lockstep for game logic
         if self.state == self.STATE_BUILDING:
             # count states
+            self.step_count += 1
             if self.step_count == self.COUNT_BUILDING_TO_READY:
                 # transition
                 self.step_count = 0
                 self.state = self.STATE_READY
-                self.game_player.money_increment += self.MONEY_INCREMENT
+                self.player.money_increment += self.MONEY_INCREMENT
 
     def destroyed(self):
-        self.game_player.money_increment -= self.MONEY_INCREMENT
+        self.player.money_increment -= self.MONEY_INCREMENT
 
 
 class Soldier(pygame.sprite.Sprite):
