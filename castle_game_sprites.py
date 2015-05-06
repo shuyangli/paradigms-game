@@ -589,6 +589,13 @@ class Market(BasicBuilding):
 
 
 class Soldier(pygame.sprite.Sprite):
+    SOLDIER_CYAN = pygame.image.load("assets/img/soldier-cyan.png")
+    SOLDIER_PINK = pygame.image.load("assets/img/soldier-pink.png")
+    SOLDIER_ORANGE = pygame.image.load("assets/img/soldier-orange.png")
+    SOLDIER_PURPLE = pygame.image.load("assets/img/soldier-purple.png")
+
+    SOLDIER_IMG = [SOLDIER_PURPLE, SOLDIER_PINK, SOLDIER_CYAN, SOLDIER_ORANGE]
+
     def __init__(self, game_model, game_player):
         pygame.sprite.Sprite.__init__(self)
 
