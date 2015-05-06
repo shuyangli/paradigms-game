@@ -9,6 +9,7 @@ class CastleGameCommand:
         HOUSE = "h"
         TOWER = "t"
         MARKET = "m"
+        PATH = "p"
         NAME_TO_CLS = {
             "h": House,
             "t": Tower,
@@ -90,15 +91,32 @@ class CastleGameCommand:
 
 
     class Route:
-        # TODO: figure out how to handle rerouting of a house
-        def __init__(self, house_x, house_y, past_x, past_y, current_x, current_y):
-            self.h_x = house_x
-            self.h_y = house_y
-            self.p_x = past_x
-            self.p_y = past_y
-            self.c_x = current_x
-            self.c_y = current_y
+        # TODO: create paths for houses
+        def __init__(self, player_pos, x, y):
+            print "*****Shuyang's dancing..."
+            self.player_pos = player_pos
+            self.x = x
+            self.y = y
 
+        def apply_to(self, game):
+            # TODO
+            print "[TODO] Route's apply_to called"
+            return
+
+        def serialize(self):
+            return "R{0}{1}{2}{3}{4}{5}".format(
+                CastleGameCommand.CMD_SEPARATOR,
+                self.player_pos,
+                CastleGameCommand.CMD_SEPARATOR,
+                self.x,
+                CastleGameCommand.CMD_SEPARATOR,
+                self.y
+            )
+
+        @classmethod
+        def deserialize(cls, encoded):
+            _, player_pos, x, y = encoded.split(CastleGameCommand.CMD_SEPARATOR)
+            return cls(int(player_pos), int(x), int(y))
 
     @classmethod
     def decode_command(cls, encoded):   # take a string
@@ -106,6 +124,8 @@ class CastleGameCommand:
             return cls.Build.deserialize(encoded)
         elif encoded[0] == "D":
             return cls.Destroy.deserialize(encoded)
+        elif encoded[0] == "R":
+            return cls.Route.deserialize(encoded)
         else:
             raise ValueError("Unknown encoded command: {0}".format(encoded))
 
@@ -136,9 +156,6 @@ class CastleGamePlayerModel:
 
         self.castle = Castle(self, self.castle_grid)
         self.castle_grid._set_building(self.castle)
-
-        # Path
-        self.path = None
 
         self.money = self.INITIAL_MONEY
         self.money_increment = self.INITIAL_MONEY_INCREMENT

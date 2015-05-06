@@ -261,6 +261,9 @@ class CastleGameUI:
                 elif e.key == K_d:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.TOWER, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)
+                elif e.key == K_SPACE:
+                    cmd = CastleGameCommand.Route(self.client.own_position, self.cursor_x, self.cursor_y)
+                    self.client.queue_command(cmd)
 
         # Ticking
         self.game_model.tick_ui()
