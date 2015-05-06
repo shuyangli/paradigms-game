@@ -114,7 +114,7 @@ class CastleClientProtocolFactory(ClientFactory):
 class CastleClient:
     """Castle game client class."""
     # FPS requested
-    DESIRED_FPS = 60.0
+    DESIRED_FPS = 30.0
 
     # 10 game frames per lockstep, 6 locksteps per second
     # Realistically this would change based on network latency
