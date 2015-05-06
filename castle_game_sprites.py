@@ -292,9 +292,9 @@ class BasicBuilding(pygame.sprite.Sprite):
 
         # Game data
         if max_hp is None:
-            self.max_hp = self.MAX_HP
+            self.hp = self.MAX_HP
         else:
-            self.max_hp = max_hp
+            self.hp = max_hp
 
         if price is None:
             self.price = self.DEFAULT_PRICE
