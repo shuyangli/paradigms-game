@@ -46,12 +46,16 @@ class Rect(pygame.sprite.Sprite):
 
 
 class Cursor(pygame.sprite.Sprite):
+    ANIMATION_PERIOD = 20
+
     def __init__(self, color, rect, width=5):
         pygame.sprite.Sprite.__init__(self)
         self.width = width
         self.color = color
-        self.rect = rect
+        self._canonical_rect = rect
         self.set_rect(rect)
+
+        self._frame_count = 0
 
     def set_color(self, color):
         self.color = color
@@ -87,12 +91,28 @@ class Cursor(pygame.sprite.Sprite):
             new_image_rect.top = y
             self._image.blit(new_image, new_image_rect)
 
-        self.rect = self._image.get_rect()
-        self.rect.center = rect.center
+        self._center = rect.center
+
+    def update(self):
+        self._frame_count = (self._frame_count + 1) % self.ANIMATION_PERIOD
 
     @property
     def image(self):
-        return self._image
+        scale_factor = 1.0
+        if self._frame_count < 10:
+            scale_factor = 1.0 + 0.01 * self._frame_count
+        else:
+            scale_factor = 1.2 - 0.01 * self._frame_count
+
+        new_image = pygame.transform.scale(self._image, (int(self._canonical_rect.width * scale_factor), int(self._canonical_rect.height * scale_factor)))
+        self._rect = new_image.get_rect()
+        self._rect.center = self._center
+        return new_image
+
+    @property
+    def rect(self):
+        return self._rect
+
 
     # draw onto image
     def draw(self, surface):

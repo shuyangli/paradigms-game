@@ -178,6 +178,9 @@ class CastleGameUI:
 
                 if DEBUG: print "[INFO][UI] Selection: {0}".format(self.cursor_y)
 
+        # Animate
+        self.cursor.update()
+
         # Drawing
         self.cursor.set_rect(self.cursor_pos_menu[self.cursor_y])
 
@@ -218,6 +221,9 @@ class CastleGameUI:
                         self.client.select_pos(self.cursor_x)
                     elif self.cursor_y == 1:
                         self.client.change_state_ready()
+
+        # Animate
+        self.cursor.update()
 
         # Drawing
         self.screen.fill(self.COLOR_WHITE)
@@ -321,6 +327,9 @@ class CastleGameUI:
                             self.isRouting = True          
                         except Exception, e:
                             print "You should route from your houses."
+
+        # Animate
+        self.cursor.update()
 
         # Ticking
         self.game_model.tick_ui()
