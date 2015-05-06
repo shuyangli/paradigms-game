@@ -241,8 +241,6 @@ class CastleGamePlayerModel:
         surface.blit(inc_label.image, inc_label.rect)
 
 
-
-
 class CastleGameModel:
     """Castle game model class. This class represents the game state."""
     WIDTH = 8
@@ -325,3 +323,11 @@ class CastleGameModel:
                 except IndexError:
                     pass
         return grids
+
+    def grid_for_coordinates(self, x, y):
+        x_grid = (x - 200) // 50
+        y_grid = (y - 50) // 50
+        if x_grid >= 0 and x_grid < 8 and y_grid >= 0 and y_grid < 8:
+            return self.board[y_grid][x_grid]
+        else:
+            raise ValueError("Given x and y coordinates don't represent a grid: ({0},{1})".format(x, y))
