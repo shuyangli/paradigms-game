@@ -105,7 +105,7 @@ class CastleGameCommand:
 
             try:
                 game.board[self.y][self.x].building.route()
-                
+
             except Exception, e:
                 print "Routing failed."
 
@@ -155,7 +155,7 @@ class CastleGamePlayerModel:
     FONT_NAME = None
     FONT_SIZE = 26
 
-    def __init__(self, pos, castle_grid, buildings=[], soldiers=[]):
+    def __init__(self, game, pos, castle_grid, buildings=[], soldiers=[]):
         # TODO: clean this up
         self.pos = pos
         self.castle_grid = castle_grid
@@ -168,6 +168,8 @@ class CastleGamePlayerModel:
         self.money = self.INITIAL_MONEY
         self.money_increment = self.INITIAL_MONEY_INCREMENT
 
+        self._game = game
+
         # Labels
         self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
 
@@ -177,6 +179,14 @@ class CastleGamePlayerModel:
 
     def add_building(self, building):
         self.buildings.append(building)
+
+    def remove_building(self, building):
+        self.buildings.remove(building)
+        # also remove owner from grids around the building's grid
+        for grid in self._game.grids_surrounding(building.grid.x, building.grid.y):
+            grid.owners.reverse()
+            grid.owners.remove(self.player_pos)
+            grid.owners.reverse()
 
     # =================
     # Ticking mechanism
@@ -261,16 +271,16 @@ class CastleGameModel:
         # Add player models
         self.player_models = []
         if PLAYER_PURPLE in all_players_pos:
-            player = CastleGamePlayerModel(PLAYER_PURPLE, self.board[0][0])
+            player = CastleGamePlayerModel(self, PLAYER_PURPLE, self.board[0][0])
             self.player_models.append(player)
         if PLAYER_PINK in all_players_pos:
-            player = CastleGamePlayerModel(PLAYER_PINK, self.board[0][self.WIDTH-1])
+            player = CastleGamePlayerModel(self, PLAYER_PINK, self.board[0][self.WIDTH-1])
             self.player_models.append(player)
         if PLAYER_CYAN in all_players_pos:
-            player = CastleGamePlayerModel(PLAYER_CYAN, self.board[self.HEIGHT-1][self.WIDTH-1])
+            player = CastleGamePlayerModel(self, PLAYER_CYAN, self.board[self.HEIGHT-1][self.WIDTH-1])
             self.player_models.append(player)
         if PLAYER_ORANGE in all_players_pos:
-            player = CastleGamePlayerModel(PLAYER_ORANGE, self.board[self.HEIGHT-1][0])
+            player = CastleGamePlayerModel(self, PLAYER_ORANGE, self.board[self.HEIGHT-1][0])
             self.player_models.append(player)
 
 
@@ -299,7 +309,7 @@ class CastleGameModel:
                 if hasattr(building, "path") and building.path != None:
                     for pathSection in building.path.pathSections:
                         surface.blit(pathSection.image, pathSection.rect)
-                    
+
 
     def tick_lock_step(self):
         # called every lockstep

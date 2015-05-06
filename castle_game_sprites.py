@@ -286,6 +286,7 @@ class BasicBuilding(pygame.sprite.Sprite):
     def __init__(self, player, _image, grid, max_hp=None, price=None):
         pygame.sprite.Sprite.__init__(self)
         self.player = player
+        self.grid = grid
         self._image = _image
         self._hammer_image = self.HAMMER_IMG[player.pos]
         self._rect = self._image.get_rect()
@@ -304,19 +305,18 @@ class BasicBuilding(pygame.sprite.Sprite):
             self.price = self.DEFAULT_PRICE
         else:
             self.price = price
+
         self.state = self.STATE_BUILDING
 
     def update(self):
         # called every ui frame for animation
-        self._ui_frame_count += 1
-        if self._ui_frame_count >= 28:
-            self._ui_frame_count = 0
+        self._ui_frame_count = (self._ui_frame_count + 1) % 28
 
     def tick_lock_step(self):
         pass
 
     def destroyed(self):
-        pass
+        self.player.remove_building(self)
 
     @property
     def image(self):
