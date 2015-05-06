@@ -389,10 +389,10 @@ class House(BasicBuilding):
     def __init__(self, player, grid):
         BasicBuilding.__init__(self, player, self.HOUSE_IMG[player.pos], grid)
         self.isRouting = False
-        self.prev_dir = 0 # when the path is first created, no direction
         self.prev_x = None # default of the end point of previous route
         self.prev_y = None
         self.path = None
+        self.dir_list = [] # list of directions
         self.color = self.COLORS[player.pos]
 
     # =================
@@ -433,45 +433,53 @@ class House(BasicBuilding):
             self.isRouting = True
             self.prev_x = 225 + 50 * x # TODO: change this so that it's not hard-coded
             self.prev_y = 75 + 50 * y
+            self.dir_list.append(0)
         else:
             # TODO: check boundaries
             if direction == self.ROUTE_UP:
-                if self.prev_dir == self.ROUTE_DOWN:
+                if self.dir_list[-1] == self.ROUTE_DOWN:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.dir_list.pop(-1)
                 else:
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4)
                     self.prev_y = self.prev_y - 50
                     self.path.pushBackPathSection(new_path)
+                    self.dir_list.append(direction)
             elif direction == self.ROUTE_DOWN:
-                if self.prev_dir == self.ROUTE_UP:
+                if self.dir_list[-1] == self.ROUTE_UP:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.dir_list.pop(-1)
                 else:
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4)
                     self.prev_y = self.prev_y + 50
                     self.path.pushBackPathSection(new_path)
+                    self.dir_list.append(direction)
             elif direction == self.ROUTE_LEFT:
-                if self.prev_dir == self.ROUTE_RIGHT:
+                if self.dir_list[-1] == self.ROUTE_RIGHT:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.dir_list.pop(-1)
                 else:
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4)
                     self.prev_x = self.prev_x - 50
                     self.path.pushBackPathSection(new_path)
+                    self.dir_list.append(direction)
             elif direction == self.ROUTE_RIGHT:
-                if self.prev_dir == self.ROUTE_LEFT:
+                if self.dir_list[-1] == self.ROUTE_LEFT:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.dir_list.pop(-1)
                 else:
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
                     self.prev_x = self.prev_x + 50
                     self.path.pushBackPathSection(new_path)
-        self.prev_dir = direction
+                    self.dir_list.append(direction)
 
 
     def train_soldier(self):
