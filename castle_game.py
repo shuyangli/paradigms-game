@@ -298,6 +298,11 @@ class CastleGameModel:
                     for pathSection in building.path.pathSections:
                         surface.blit(pathSection.image, pathSection.rect)
 
+        # draw soldiers
+        for player in self.player_models:
+            for soldier in player.soldiers:
+                surface.blit(soldier.image, soldier.rect)
+
 
     def tick_lock_step(self):
         # called every lockstep
