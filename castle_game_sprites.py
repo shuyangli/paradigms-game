@@ -1,6 +1,8 @@
 import pygame
 from pygame.locals import *
 
+import math
+
 PLAYER_NONE = -1
 PLAYER_PURPLE = 0
 PLAYER_PINK = 1
@@ -292,9 +294,10 @@ class BasicBuilding(pygame.sprite.Sprite):
 
         # Game data
         if max_hp is None:
-            self.hp = self.MAX_HP
+            self.max_hp = self.MAX_HP
         else:
-            self.hp = max_hp
+            self.max_hp = max_hp
+        self.hp = self.max_hp
 
         if price is None:
             self.price = self.DEFAULT_PRICE
@@ -310,8 +313,21 @@ class BasicBuilding(pygame.sprite.Sprite):
     def tick_lock_step(self):
         pass
 
+    # ======
+    # Events
+    # ======
     def destroyed(self):
         self.player.remove_building(self)
+
+    def hit_by_soldier(self, soldier):
+        if soldier.player.pos != self.owner:
+            # cause damange if the building and the soldier are different
+            self.hp -= soldier.damage
+            if self.hp < 0:
+                self.destroyed()
+
+        # but kill the soldier anyways
+        soldier.die()
 
     @property
     def image(self):
@@ -330,6 +346,10 @@ class BasicBuilding(pygame.sprite.Sprite):
             rotated_rect = rotated.get_rect()
             rotated_rect.center = base_rect.center
             img.blit(rotated, rotated_rect)
+
+        # if self.hp < self.max_hp:
+        #     # hp not full, we also blit a hp bar
+
 
         return img
 
@@ -488,6 +508,7 @@ class House(BasicBuilding):
 
 
     def train_soldier(self):
+        # TODO: Create a soldier
         pass
 
     def destroyed(self):
@@ -594,8 +615,67 @@ class Soldier(pygame.sprite.Sprite):
 
     SOLDIER_IMG = [SOLDIER_PURPLE, SOLDIER_PINK, SOLDIER_CYAN, SOLDIER_ORANGE]
 
-    def __init__(self, game, player):
+    SPEED = 2
+
+
+    def __init__(self, house, game, player):
         pygame.sprite.Sprite.__init__(self)
+        self.player = player
+        self.house = house
+        self.game = game
+        self._image = self.SOLDIER_IMG[player.pos]
+
+        # Initially it's located at the house
+        self.current_grid = self.house.grid
+        self._canonical_rect = self._image.get_rect()
+        self.current_x = self.house.rect.centerx
+        self.current_y = self.house.rect.centery
+
+    # Movement per UI frame
+    def update(self):
+        # TODO: get current destination: (x, y)
+        destination = (None, None)
+
+        if destination is not None:
+            # move towards destination
+            if abs(destination[0] - self.current_x) >= self.SPEED:
+                self.current_x += math.copysign(self.SPEED, destination[0] - self.current_x)
+            else:
+                self.current_x = destination[0]
+            if abs(destination[1] - self.current_y) >= self.SPEED:
+                self.current_y += math.copysign(self.SPEED, destination[1] - self.current_y)
+            else:
+                self.current_y = destination[1]
+
+        # check collision with grid
+        current_grid = self.game.grid_for_coordinates(self.current_x, self.current_y)
+        if current_grid != self.current_grid:
+            # TODO: remove soldier from the previous grid, and install it in the new grid
+            # this is for easy tower attacking
+            pass
+
+        if current_grid.building is not None:
+            # hit building
+            current_grid.building.hit_by_soldier(self)
+
+    # ======
+    # Events
+    # ======
+    def die(self):
+        # TODO: make it disappear
+        pass
+
+
+    @property
+    def image(self):
+        return self._image
+
+    @property
+    def rect(self):
+        rect = self._canonical_rect
+        rect.center = (self.current_x, self.current_y)
+        return rect
+
 
 
 class Path(pygame.sprite.Sprite):
