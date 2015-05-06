@@ -300,6 +300,7 @@ class CastleGameUI:
                             self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
+                            my_house.complete = True
                             self.is_routing = False
                 elif e.key == K_RIGHT:
                     self.cursor_x = self.cursor_x + 1 if self.cursor_x != 7 else 7
@@ -312,6 +313,7 @@ class CastleGameUI:
                             self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
+                            my_house.complete = True
                             self.is_routing = False
                 elif e.key == K_UP:
                     self.cursor_y = self.cursor_y - 1 if self.cursor_y != 0 else 0
@@ -324,6 +326,7 @@ class CastleGameUI:
                             self.client.queue_command(cmd) 
                             self.route_from_x = None
                             self.route_from_y = None
+                            my_house.complete = True
                             self.is_routing = False
                 elif e.key == K_DOWN:
                     self.cursor_y = self.cursor_y + 1 if self.cursor_y != 7 else 7
@@ -336,6 +339,7 @@ class CastleGameUI:
                             self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
+                            my_house.complete = True
                             self.is_routing = False
                     
                 elif e.key == K_a:

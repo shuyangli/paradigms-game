@@ -414,7 +414,7 @@ class House(BasicBuilding):
         self.path_dim = [] # used for pickling of the path object
         self.dir_list = [] # list of directions
         self.color = self.COLORS[player.pos]
-
+        self.complete = False
         self.soldiers = []
 
 
@@ -437,7 +437,7 @@ class House(BasicBuilding):
                 self.step_count = 0
                 self.state = self.STATE_READY
 
-        elif self.state == self.STATE_READY and not self.is_routing and self.path is not None:
+        elif self.state == self.STATE_READY and self.complete:
             self.train_soldier()
 
             # transition
@@ -465,6 +465,7 @@ class House(BasicBuilding):
             self.prev_y = self.y
             self.dir_list = []
             self.path_dim = []
+            self.complete = False
             return
         
         if direction == self.ROUTE_CANCEL:
@@ -474,6 +475,7 @@ class House(BasicBuilding):
             self.prev_y = self.y
             self.path_dim = []
             self.dir_list = []
+            self.complete = False
             return
 
         if 225 + 50 * x == self.prev_x and 75 + 50 * y == self.prev_y: # check bounds
