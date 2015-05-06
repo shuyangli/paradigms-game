@@ -240,7 +240,6 @@ class BoardGrid(pygame.sprite.Sprite):
     def image(self):
         return self.GROUND_IMG[self.owner]
 
-
 class BasicBuilding(pygame.sprite.Sprite):
     HAMMER_CYAN = pygame.image.load("assets/img/hammer-cyan.png")
     HAMMER_PINK = pygame.image.load("assets/img/hammer-pink.png")
@@ -346,8 +345,8 @@ class House(BasicBuilding):
     HOUSE_PURPLE = pygame.image.load("assets/img/house-purple.png")
     HOUSE_IMG = [HOUSE_PURPLE, HOUSE_PINK, HOUSE_CYAN, HOUSE_ORANGE]
 
-    COUNT_BUILDING_TO_READY = 5
-    COUNT_COOLDOWN_TO_READY = 3
+    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_COOLDOWN_TO_READY = 3 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
     def __init__(self, player, grid):
@@ -403,8 +402,8 @@ class Tower(BasicBuilding):
     STATE_READY = 1
     STATE_COOLDOWN = 2
 
-    COUNT_BUILDING_TO_READY = 5
-    COUNT_COOLDOWN_TO_READY = 5
+    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
     def __init__(self, player, grid):
@@ -455,7 +454,7 @@ class Market(BasicBuilding):
     STATE_BUILDING = 0
     STATE_READY = 1
 
-    COUNT_BUILDING_TO_READY = 5
+    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
     MONEY_INCREMENT = 5
