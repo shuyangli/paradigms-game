@@ -181,6 +181,78 @@ class BoardGrid(pygame.sprite.Sprite):
     def image(self):
         return self.GROUND_IMG[self.owner]
 
+
+class BasicBuilding(pygame.sprite.Sprite):
+    HAMMER_CYAN = pygame.image.load("assets/img/hammer-cyan.png")
+    HAMMER_PINK = pygame.image.load("assets/img/hammer-pink.png")
+    HAMMER_ORANGE = pygame.image.load("assets/img/hammer-orange.png")
+    HAMMER_PURPLE = pygame.image.load("assets/img/hammer-purple.png")
+    HAMMER_IMG = [HAMMER_PURPLE, HAMMER_PINK, HAMMER_CYAN, HAMMER_ORANGE]
+
+    STATE_BUILDING = 0
+    STATE_READY = 1
+    STATE_COOLDOWN = 2
+
+    COUNT_BUILDING_TO_READY = 5
+    COUNT_COOLDOWN_TO_READY = 3
+
+    MAX_HP = 100
+
+    def __init__(self, player, _image, grid, max_hp=None):
+        pygame.sprite.Sprite.__init__(self)
+        self._image = _image
+        self._hammer_image = self.HAMMER_IMG[player.pos]
+        self._rect = self._image.get_rect()
+        self._rect.center = grid.rect.center
+
+        # Game data
+        if max_hp is None:
+            self.max_hp = self.MAX_HP
+        else:
+            self.max_hp = max_hp
+        self.state = self.STATE_BUILDING
+
+        # Add to player
+        player.add_building(self)
+
+
+    def update(self):
+        # called every ui frame for animation
+        self.ui_frame_count += 1
+        if self.ui_frame_count >= 28:
+            self.ui_frame_count = 0
+
+    def tick_lock_step(self):
+        pass
+
+    def destroyed(self):
+        pass
+
+    @property
+    def image(self):
+        base_rect = self._image.get_rect()
+        img = pygame.Surface((base_rect.width, base_rect.height), pygame.SRCALPHA, 32).convert_alpha()
+        img.blit(self._image, base_rect)
+
+        if self.state == self.STATE_BUILDING:
+            # building state, we also blit a hammer
+            rotated = None
+            if self.ui_frame_count >= 14:
+                rotated = pygame.transform.rotate(self._hammer_image, 98 - self.ui_frame_count * 3.5)
+            else:
+                rotated = pygame.transform.rotate(self._hammer_image, self.ui_frame_count * 3.5)
+
+            rotated_rect = rotated.get_rect()
+            rotated_rect.center = base_rect.center
+            img.blit(rotated, rotated_rect)
+
+        return img
+
+    @property
+    def rect(self):
+        return self._rect
+
+
 class Castle(pygame.sprite.Sprite):
     CASTLE_CYAN = pygame.image.load("assets/img/castle-cyan.png")
     CASTLE_PINK = pygame.image.load("assets/img/castle-pink.png")
@@ -202,46 +274,30 @@ class Castle(pygame.sprite.Sprite):
         pass
 
 
-class House(pygame.sprite.Sprite):
+class House(BasicBuilding):
     HOUSE_CYAN = pygame.image.load("assets/img/house-cyan.png")
     HOUSE_PINK = pygame.image.load("assets/img/house-pink.png")
     HOUSE_ORANGE = pygame.image.load("assets/img/house-orange.png")
     HOUSE_PURPLE = pygame.image.load("assets/img/house-purple.png")
     HOUSE_IMG = [HOUSE_PURPLE, HOUSE_PINK, HOUSE_CYAN, HOUSE_ORANGE]
 
-    STATE_BUILDING = 0
-    STATE_READY = 1
-    STATE_COOLDOWN = 2
-
-    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
-    COUNT_COOLDOWN_TO_READY = 3 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_BUILDING_TO_READY = 5
+    COUNT_COOLDOWN_TO_READY = 3
     step_count = 0
 
+    ui_frame_count = 0
+
     def __init__(self, player, grid):
-        pygame.sprite.Sprite.__init__(self)
-
-        # Image
-        self.owner = player.pos
-        self.grid = grid
-        self.image = self.HOUSE_IMG[self.owner]
-        self.rect = self.image.get_rect()
-        self.rect.center = self.grid.rect.center
-
-        # State machine
-        self.state = self.STATE_BUILDING
+        BasicBuilding.__init__(self, player, self.HOUSE_IMG[player.pos], grid)
 
     # =================
     # Ticking mechanism
     # =================
-    def update(self):
-        # called every ui frame for animation
-        # update image
-        pass
-
     def tick_lock_step(self):
         # called every lockstep for game logic
         if self.state == self.STATE_BUILDING:
             # count states
+            self.step_count += 1
             if self.step_count == self.COUNT_BUILDING_TO_READY:
                 # transition
                 self.step_count = 0
@@ -269,11 +325,12 @@ class House(pygame.sprite.Sprite):
         pass
 
     def destroyed(self):
+        # TODO: Remove all soldiers
         pass
 
 
 
-class Tower(pygame.sprite.Sprite):
+class Tower(BasicBuilding):
     TOWER_CYAN = pygame.image.load("assets/img/tower-cyan.png")
     TOWER_PINK = pygame.image.load("assets/img/tower-pink.png")
     TOWER_ORANGE = pygame.image.load("assets/img/tower-orange.png")
@@ -284,30 +341,16 @@ class Tower(pygame.sprite.Sprite):
     STATE_READY = 1
     STATE_COOLDOWN = 2
 
-    COUNT_BUILDING_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
-    COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
+    COUNT_BUILDING_TO_READY = 5
+    COUNT_COOLDOWN_TO_READY = 5
     step_count = 0
 
     def __init__(self, player, grid):
-        pygame.sprite.Sprite.__init__(self)
-
-        # Image
-        self.owner = player.pos
-        self.grid = grid
-        self.image = self.TOWER_IMG[self.owner]
-        self.rect = self.image.get_rect()
-        self.rect.center = self.grid.rect.center
-
-        self.state = self.STATE_BUILDING
+        BasicBuilding.__init__(self, player, self.TOWER_IMG[player.pos], grid)
 
     # =================
     # Ticking mechanism
     # =================
-    def update(self):
-        # called every ui frame for animation
-        # update image
-        pass
-
     def tick_lock_step(self):
         # called every lockstep for game logic
         if self.state == self.STATE_BUILDING:
@@ -338,9 +381,6 @@ class Tower(pygame.sprite.Sprite):
         # TODO
         return False
 
-    def destroyed(self):
-        pass
-
 
 class Market(pygame.sprite.Sprite):
     MARKET_CYAN = pygame.image.load("assets/img/market-cyan.png")
@@ -358,25 +398,11 @@ class Market(pygame.sprite.Sprite):
     MONEY_INCREMENT = 5
 
     def __init__(self, player, grid):
-        pygame.sprite.Sprite.__init__(self)
-
-        # Image
-        self.owner = player.pos
-        self.grid = grid
-        self.image = self.MARKET_IMG[self.owner]
-        self.rect = self.image.get_rect()
-        self.rect.center = self.grid.rect.center
-
-        self.state = self.STATE_BUILDING
+        BasicBuilding.__init__(self, player, self.MARKET_IMG[player.pos], grid)
 
     # =================
     # Ticking mechanism
     # =================
-    def update(self):
-        # called every ui frame for animation
-        # update image
-        pass
-
     def tick_lock_step(self):
         # called every lockstep for game logic
         if self.state == self.STATE_BUILDING:
