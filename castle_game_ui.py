@@ -38,6 +38,12 @@ class CastleGameUI:
     PLAYER_COLOR_LIGHT = [COLOR_LIGHT_PURPLE, COLOR_LIGHT_PINK, COLOR_LIGHT_CYAN, COLOR_LIGHT_ORANGE]
     PLAYER_COLOR_DARK = [COLOR_DARK_PURPLE, COLOR_DARK_PINK, COLOR_DARK_CYAN, COLOR_DARK_ORANGE]
 
+    # route directions
+    ROUTE_UP = 1
+    ROUTE_DOWN = 2
+    ROUTE_LEFT = 3
+    ROUTE_RIGHT = 4
+
     def __init__(self, debug=False):
         # Init pygame
         self.init_pygame()
@@ -280,22 +286,22 @@ class CastleGameUI:
                     self.cursor_x = (self.cursor_x - 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
-                        pass
+                        self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_LEFT, 0, 0)
                 elif e.key == K_RIGHT:
                     self.cursor_x = (self.cursor_x + 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
-                        pass
+                        self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_RIGHT, 0, 0)
                 elif e.key == K_UP:
                     self.cursor_y = (self.cursor_y - 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
-                        pass
+                        self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_UP, 0, 0)
                 elif e.key == K_DOWN:
                     self.cursor_y = (self.cursor_y + 1) % 8
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
                     if self.isRouting:
-                        pass
+                        self.game_model.board[self.route_from_y][self.route_from_x].building.route(self.ROUTE_DOWN, 0, 0)
 
                 elif e.key == K_a:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.HOUSE, self.cursor_x, self.cursor_y)
@@ -306,9 +312,15 @@ class CastleGameUI:
                 elif e.key == K_d:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.TOWER, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)
-                elif e.key == K_SPACE or e.key == K_RETURN:
+                elif e.key == K_SPACE:
                     if not self.isRouting:
-                        self.game_model.board[self.y][self.x].building.route()
+                        try:
+                            self.game_model.board[self.cursor_y][self.cursor_x].building.route(0, self.cursor_x, self.cursor_y)
+                            self.route_from_x = self.cursor_x
+                            self.route_from_y = self.cursor_y 
+                            self.isRouting = True          
+                        except Exception, e:
+                            print "You should route from your houses."
 
         # Ticking
         self.game_model.tick_ui()

@@ -349,10 +349,25 @@ class House(BasicBuilding):
     COUNT_COOLDOWN_TO_READY = 3 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
+    COLOR_DARK_CYAN = (39, 190, 173)
+    COLOR_DARK_PINK = (192, 62, 62)
+    COLOR_DARK_ORANGE = (200, 146, 37)
+    COLOR_DARK_PURPLE = (118, 66, 200)
+    COLORS = [COLOR_DARK_CYAN, COLOR_DARK_PINK, COLOR_DARK_ORANGE, COLOR_DARK_PURPLE]
+
+    ROUTE_UP = 1
+    ROUTE_DOWN = 2
+    ROUTE_LEFT = 3
+    ROUTE_RIGHT = 4
+
     def __init__(self, player, grid):
         BasicBuilding.__init__(self, player, self.HOUSE_IMG[player.pos], grid)
         self.isRouting = False
+        self.prev_dir = 0 # when the path is first created, no direction
+        self.prev_x = None # default of the end point of previous route
+        self.prev_y = None 
         self.path = None
+        self.color = self.COLORS[player.pos]
 
     # =================
     # Ticking mechanism
@@ -385,13 +400,53 @@ class House(BasicBuilding):
     # ======
     # Events
     # ======
-    def route(self):
-        if self.path != None: return
+    def route(self, direction, x, y): # TODO: reformat this stupid function
+        if not self.isRouting and self.path != None: return
         if not self.isRouting:
             self.path = Path()
+            print self.path
             self.isRouting = True
-            return
-
+            self.prev_x = 225 + 50 * x # TODO: change this so that it's not hard-coded
+            self.prev_y = 75 + 50 * y
+        else:    
+            # TODO: check boundaries
+            if direction == self.ROUTE_UP:
+                if self.prev_dir == self.ROUTE_DOWN:
+                    self.prev_x = self.path.pathSections[-1].x1
+                    self.prev_y = self.path.pathSections[-1].y1
+                    self.path.popBackPathSection()
+                else:
+                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4)
+                    self.prev_y = self.prev_y - 50
+                    self.path.pushBackPathSection(new_path)
+            elif direction == self.ROUTE_DOWN:
+                if self.prev_dir == self.ROUTE_UP:
+                    self.prev_x = self.path.pathSections[-1].x1
+                    self.prev_y = self.path.pathSections[-1].y1
+                    self.path.popBackPathSection()
+                else:
+                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4)
+                    self.prev_y = self.prev_y + 50
+                    self.path.pushBackPathSection(new_path)
+            elif direction == self.ROUTE_LEFT:
+                if self.prev_dir == self.ROUTE_RIGHT:
+                    self.prev_x = self.path.pathSections[-1].x1
+                    self.prev_y = self.path.pathSections[-1].y1
+                    self.path.popBackPathSection()
+                else:
+                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4)
+                    self.prev_x = self.prev_x - 50
+                    self.path.pushBackPathSection(new_path)
+            elif direction == self.ROUTE_RIGHT:
+                if self.prev_dir == self.ROUTE_LEFT:
+                    self.prev_x = self.path.pathSections[-1].x1
+                    self.prev_y = self.path.pathSections[-1].y1
+                    self.path.popBackPathSection()
+                else:  
+                    new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
+                    self.prev_x = self.prev_x + 50
+                    self.path.pushBackPathSection(new_path)
+        self.prev_dir = direction
 
 
     def train_soldier(self):
@@ -506,7 +561,7 @@ class Path(pygame.sprite.Sprite):
         self.pathSections.append(pathSection)
 
     def popBackPathSection(self):
-        self.pathSections = self.pathSections[:-1]
+        self.pathSections.pop(-1)
 
     def setDestination(self, enemy_building):
         self.destination = enemy_building
@@ -514,21 +569,25 @@ class Path(pygame.sprite.Sprite):
 class PathSection(pygame.sprite.Sprite):
     def __init__(self, color, x1, y1, x2, y2, width):
         pygame.sprite.Sprite.__init__(self)
-        self.x1 = self.x1
-        self.y1 = self.y1
-        self.x2 = self.x2
-        self.y2 = self.y2
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        print "(", x1, ",", y1, "->", x2, ",", y2, ")"
 
         # drawing
         self.image = None
-        if self.start_x == self.end_x: # vertical
-            self.image = pygame.Surface([width, abs(self.end_y - self.start_y)])
-        elif self.start_y == self.end_y: # horizontal
-            self.image = pygame.Surface([abs(self.end_x - self.start_x), width])
+        if self.x1 == self.x2: # vertical
+            self.image = pygame.Surface([width, abs(self.y2 - self.y1)])
+            print width, abs(self.y2 - self.y1)
+        elif self.y1 == self.y2: # horizontal
+            self.image = pygame.Surface([abs(self.x2 - self.x1), width])
+            print abs(self.x2 - self.x1), width
         else: return
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.centerx = (self.x1 + self.x2) / 2
         self.rect.centery = (self.y1 + self.y2) / 2
+        print self.rect.centerx, self.rect.centery
 
 

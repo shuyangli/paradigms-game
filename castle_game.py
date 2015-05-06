@@ -146,7 +146,7 @@ class CastleGamePlayerModel:
     LABEL_COLORS = [(118, 66, 200), (192, 62, 62), (39, 190, 173), (200, 146, 37)]
 
     # Default value
-    INITIAL_MONEY = 0
+    INITIAL_MONEY = 1000 # TODO: Change it back
     INITIAL_MONEY_INCREMENT = 5
 
     last_time = 0
@@ -292,6 +292,16 @@ class CastleGameModel:
         # draw user labels
         for player in self.player_models:
             player.draw(surface)
+
+        # draw paths
+        for player in self.player_models:
+            for building in player.buildings:
+                if hasattr(building, "path") and building.path != None:
+                    # print len(building.path.pathSections)
+                    
+                    for pathSection in building.path.pathSections:
+                        surface.blit(pathSection.image, pathSection.rect)
+                    
 
     def tick_lock_step(self):
         # called every lockstep
