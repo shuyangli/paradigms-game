@@ -26,10 +26,8 @@ class CastleGameCommand:
             return "<Build>Player: {0}, Building: {1}, Position: {2}".format(self.player_pos, self.building, (self.x, self.y))
 
         def apply_to(self, game):
-            # TODO
-            print "[TODO] Build's apply_to called"
             player = [x for x in game.player_models if x.pos == self.player_pos][0]
-            new_building = self.NAME_TO_CLS[self.building](player, game.board[self.y][self.x])
+            new_building = self.NAME_TO_CLS[self.building](game, player, game.board[self.y][self.x])
 
             # Test building criteria
             pred_no_building = (game.board[self.y][self.x].building is None)
@@ -162,7 +160,7 @@ class CastleGamePlayerModel:
         self.buildings = buildings  # [buildings]
         self.soldiers = soldiers    # [soldiers]
 
-        self.castle = Castle(self, self.castle_grid)
+        self.castle = Castle(game, self, self.castle_grid)
         self.castle_grid._set_building(self.castle)
 
         self.money = self.INITIAL_MONEY

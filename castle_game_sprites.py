@@ -118,12 +118,6 @@ class Cursor(pygame.sprite.Sprite):
         surface.blit(self.image, self.rect)
 
 
-class SelectionBox(pygame.sprite.Sprite):
-    def __init__(self, game_ui):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((0, 0)) # default surface
-        self.rect = self.image.get_rect()
-
 class PlayerCastle(pygame.sprite.Sprite):
     CASTLE_CYAN = pygame.image.load("assets/img/castle-cyan-large.png")
     CASTLE_PINK = pygame.image.load("assets/img/castle-pink-large.png")
@@ -283,9 +277,10 @@ class BasicBuilding(pygame.sprite.Sprite):
     MAX_HP = 100
     DEFAULT_PRICE = 100
 
-    def __init__(self, player, _image, grid, max_hp=None, price=None):
+    def __init__(self, game, player, _image, grid, max_hp=None, price=None):
         pygame.sprite.Sprite.__init__(self)
         self.player = player
+        self.game = game
         self.grid = grid
         self._image = _image
         self._hammer_image = self.HAMMER_IMG[player.pos]
@@ -350,8 +345,9 @@ class Castle(pygame.sprite.Sprite):
     CASTLE_PURPLE = pygame.image.load("assets/img/castle-purple.png")
     CASTLE_IMG = [CASTLE_PURPLE, CASTLE_PINK, CASTLE_CYAN, CASTLE_ORANGE]
 
-    def __init__(self, player, grid):
+    def __init__(self, game, player, grid):
         self.owner = player.pos
+        self.game = game
         self.grid = grid
         self.image = self.CASTLE_IMG[self.owner]
         self.rect = self.image.get_rect()
@@ -387,8 +383,8 @@ class House(BasicBuilding):
     ROUTE_RIGHT = 4
     ROUTE_CANCEL = 5
 
-    def __init__(self, player, grid):
-        BasicBuilding.__init__(self, player, self.HOUSE_IMG[player.pos], grid)
+    def __init__(self, game, player, grid):
+        BasicBuilding.__init__(self, game, player, self.HOUSE_IMG[player.pos], grid)
         self.isRouting = False
         self.prev_x = None # default of the end point of previous route
         self.prev_y = None
@@ -515,8 +511,8 @@ class Tower(BasicBuilding):
     COUNT_COOLDOWN_TO_READY = 5 * GAME_FRAMES_PER_LOCK_STEP
     step_count = 0
 
-    def __init__(self, player, grid):
-        BasicBuilding.__init__(self, player, self.TOWER_IMG[player.pos], grid)
+    def __init__(self, game, player, grid):
+        BasicBuilding.__init__(self, game, player, self.TOWER_IMG[player.pos], grid)
 
     # =================
     # Ticking mechanism
@@ -568,8 +564,8 @@ class Market(BasicBuilding):
 
     MONEY_INCREMENT = 5
 
-    def __init__(self, player, grid):
-        BasicBuilding.__init__(self, player, self.MARKET_IMG[player.pos], grid, price=50)
+    def __init__(self, game, player, grid):
+        BasicBuilding.__init__(self, game, player, self.MARKET_IMG[player.pos], grid, price=50)
 
     # =================
     # Ticking mechanism
@@ -598,7 +594,7 @@ class Soldier(pygame.sprite.Sprite):
 
     SOLDIER_IMG = [SOLDIER_PURPLE, SOLDIER_PINK, SOLDIER_CYAN, SOLDIER_ORANGE]
 
-    def __init__(self, game_model, game_player):
+    def __init__(self, game, player):
         pygame.sprite.Sprite.__init__(self)
 
 
