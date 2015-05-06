@@ -97,7 +97,6 @@ class CastleGameCommand:
             self.path_dim = path_dim
 
         def apply_to(self, game):
-            print "[TODO] Route's apply_to called"
             # copy out route
             house = game.board[self.house_y][self.house_x].building
             house.reload_path_from_dimensions(self.path_dim)
@@ -115,7 +114,7 @@ class CastleGameCommand:
         @classmethod
         def deserialize(cls, encoded):
             _, house_x, house_y, path_dim = encoded.split(CastleGameCommand.CMD_SEPARATOR)
-            return cls(int(house_x), int(house_y), pickle.loads(path_dim))
+            return cls(int(house_x), int(house_y), pickle.loads(str(path_dim)))
 
     @classmethod
     def decode_command(cls, encoded):   # take a string

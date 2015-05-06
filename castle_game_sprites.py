@@ -9,13 +9,6 @@ PLAYER_PINK = 1
 PLAYER_CYAN = 2
 PLAYER_ORANGE = 3
 
-
-COLOR_DARK_PURPLE = (118, 66, 200)
-COLOR_DARK_CYAN = (39, 190, 173)
-COLOR_DARK_PINK = (192, 62, 62)
-COLOR_DARK_ORANGE = (200, 146, 37)
-PLAYER_COLOR_DARK = [COLOR_DARK_PURPLE, COLOR_DARK_PINK, COLOR_DARK_CYAN, COLOR_DARK_ORANGE]
-
 # ===========
 # UI elements
 # ===========
@@ -358,19 +351,8 @@ class BasicBuilding(pygame.sprite.Sprite):
             img.blit(rotated, rotated_rect)
 
         if self.hp < self.max_hp:
-            # hp is not full, we also blit a damage bar
-            damage_fraction = float(self.max_hp - self.hp) / self.max_hp
-            bar_width = self.grid.rect.width
-            bar_height = int(self.grid.rect.height * damage_fraction)
-
-            damage_bar = pygame.Surface((bar_width, bar_height))
-            damage_bar.fill(PLAYER_COLOR_DARK[self.owner])
-            damage_bar.set_alpha(100)
-
-            damage_rect = damage_bar.get_rect()
-            damage_rect.bottom = self.grid.rect.height
-
-            img.blit(damage_bar, damage_rect)
+            # TODO: hp not full, we also blit a hp bar
+            pass
 
         return img
 
@@ -471,13 +453,13 @@ class House(BasicBuilding):
     # Events
     # ======
     def route(self, direction, x, y): # TODO: reformat this stupid function
-        if not self.isRouting and self.path != None: return
         if not self.isRouting:
             self.path = Path()
             self.isRouting = True
             self.prev_x = 225 + 50 * x # TODO: change this so that it's not hard-coded
             self.prev_y = 75 + 50 * y
-            self.dir_list.append(0)
+            self.dir_list = [ 0 ]
+            self.path_dim = []
         else:
             if direction == self.ROUTE_CANCEL:
                 self.path = None
@@ -493,53 +475,52 @@ class House(BasicBuilding):
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
-                    self.path.pop_back_path_section()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4)
                     self.prev_y = self.prev_y - 50
-                    self.path.push_back_path_section(new_path)
+                    self.path.pushBackPathSection(new_path)
                     self.dir_list.append(direction)
             elif direction == self.ROUTE_DOWN:
                 if self.dir_list[-1] == self.ROUTE_UP:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
-                    self.path.pop_back_path_section()
+                    self.path.popBackPathSection()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4)
                     self.prev_y = self.prev_y + 50
-                    self.path.push_back_path_section(new_path)
+                    self.path.pushBackPathSection(new_path)
                     self.dir_list.append(direction)
             elif direction == self.ROUTE_LEFT:
                 if self.dir_list[-1] == self.ROUTE_RIGHT:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
-                    self.path.pop_back_path_section()
+                    self.path.popBackPathSection()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4)
                     self.prev_x = self.prev_x - 50
-                    self.path.push_back_path_section(new_path)
+                    self.path.pushBackPathSection(new_path)
                     self.dir_list.append(direction)
             elif direction == self.ROUTE_RIGHT:
                 if self.dir_list[-1] == self.ROUTE_LEFT:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
-                    self.path.pop_back_path_section()
+                    self.path.popBackPathSection()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
                     self.prev_x = self.prev_x + 50
-                    self.path.push_back_path_section(new_path)
+                    self.path.pushBackPathSection(new_path)
                     self.dir_list.append(direction)
             building_at_new_pos = self.game.grid_for_coordinates(self.prev_x, self.prev_y).building
             if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player.pos):
@@ -549,8 +530,7 @@ class House(BasicBuilding):
 
     def train_soldier(self):
         # TODO: Create a soldier
-        print "House's train_soldier called"
-        new_soldier = Soldier(self, self.game, self.player)
+        pass
 
     def destroyed(self):
         # TODO: Remove all soldiers
@@ -658,6 +638,7 @@ class Soldier(pygame.sprite.Sprite):
 
     SPEED = 2
 
+
     def __init__(self, house, game, player):
         pygame.sprite.Sprite.__init__(self)
         self.player = player
@@ -673,7 +654,8 @@ class Soldier(pygame.sprite.Sprite):
 
     # Movement per UI frame
     def update(self):
-        destination = self.house.path.next_destination(self.current_x, self.current_y)
+        # TODO: get current destination: (x, y)
+        destination = (None, None)
 
         if destination is not None:
             # move towards destination
@@ -722,19 +704,14 @@ class Path(pygame.sprite.Sprite):
         self.destination = None
         self.pathSections = []
 
-    def push_back_path_section(self, pathSection):
+    def pushBackPathSection(self, pathSection):
         self.pathSections.append(pathSection)
 
-    def pop_back_path_section(self):
+    def popBackPathSection(self):
         self.pathSections.pop(-1)
 
-    def set_destination(self, enemy_building):
+    def setDestination(self, enemy_building):
         self.destination = enemy_building
-
-
-    def next_destination(self, soldier_x, soldier_y):
-        # TODO: return an actual destination in coordinates
-        return (0, 0)
 
 
 class PathSection(pygame.sprite.Sprite):
