@@ -475,52 +475,53 @@ class House(BasicBuilding):
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.path.pop_back_path_section()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4)
                     self.prev_y = self.prev_y - 50
-                    self.path.pushBackPathSection(new_path)
+                    self.path.push_back_path_section(new_path)
                     self.dir_list.append(direction)
             elif direction == self.ROUTE_DOWN:
                 if self.dir_list[-1] == self.ROUTE_UP:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
-                    self.path.popBackPathSection()
+                    self.path.pop_back_path_section()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4)
                     self.prev_y = self.prev_y + 50
-                    self.path.pushBackPathSection(new_path)
+                    self.path.push_back_path_section(new_path)
                     self.dir_list.append(direction)
             elif direction == self.ROUTE_LEFT:
                 if self.dir_list[-1] == self.ROUTE_RIGHT:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
-                    self.path.popBackPathSection()
+                    self.path.pop_back_path_section()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4)
                     self.prev_x = self.prev_x - 50
-                    self.path.pushBackPathSection(new_path)
+                    self.path.push_back_path_section(new_path)
                     self.dir_list.append(direction)
             elif direction == self.ROUTE_RIGHT:
                 if self.dir_list[-1] == self.ROUTE_LEFT:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
-                    self.path.popBackPathSection()
+                    self.path.pop_back_path_section()
                     self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
                     self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
                     self.prev_x = self.prev_x + 50
-                    self.path.pushBackPathSection(new_path)
+                    self.path.push_back_path_section(new_path)
                     self.dir_list.append(direction)
             building_at_new_pos = self.game.grid_for_coordinates(self.prev_x, self.prev_y).building
             if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player.pos):
@@ -530,7 +531,8 @@ class House(BasicBuilding):
 
     def train_soldier(self):
         # TODO: Create a soldier
-        pass
+        print "House's train_soldier called"
+        new_soldier = Soldier(self, self.game, self.player)
 
     def destroyed(self):
         # TODO: Remove all soldiers
@@ -638,7 +640,6 @@ class Soldier(pygame.sprite.Sprite):
 
     SPEED = 2
 
-
     def __init__(self, house, game, player):
         pygame.sprite.Sprite.__init__(self)
         self.player = player
@@ -655,7 +656,7 @@ class Soldier(pygame.sprite.Sprite):
     # Movement per UI frame
     def update(self):
         # TODO: get current destination: (x, y)
-        destination = (None, None)
+        destination = self.house.path.next_destination(self.current_x, self.current_y)
 
         if destination is not None:
             # move towards destination
@@ -704,14 +705,19 @@ class Path(pygame.sprite.Sprite):
         self.destination = None
         self.pathSections = []
 
-    def pushBackPathSection(self, pathSection):
+    def push_back_path_section(self, pathSection):
         self.pathSections.append(pathSection)
 
-    def popBackPathSection(self):
+    def pop_back_path_section(self):
         self.pathSections.pop(-1)
 
-    def setDestination(self, enemy_building):
+    def set_destination(self, enemy_building):
         self.destination = enemy_building
+
+
+    def next_destination(self, soldier_x, soldier_y):
+        # TODO: return an actual destination in coordinates
+        return (0, 0)
 
 
 class PathSection(pygame.sprite.Sprite):
