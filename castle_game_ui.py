@@ -67,7 +67,7 @@ class CastleGameUI:
         self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
 
         pygame.mixer.music.load("assets/sound/ice-cream-sandwich.ogg")
-        pygame.mixer.music.play(-1, 0.0)
+        # pygame.mixer.music.play(-1, 0.0)
 
 
     def set_client(self, client):
@@ -308,7 +308,7 @@ class CastleGameUI:
                     if self.is_routing:
                         my_house = self.game_model.board[self.route_from_y][self.route_from_x].building
                         my_house.route(self.ROUTE_RIGHT, self.cursor_x, self.cursor_y)
-                        if not my_house.is_routing: 
+                        if not my_house.is_routing:
                             cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, my_house.path_dim)
                             self.client.queue_command(cmd)
                             self.route_from_x = None
@@ -323,7 +323,7 @@ class CastleGameUI:
                         my_house.route(self.ROUTE_UP, self.cursor_x, self.cursor_y)
                         if not my_house.is_routing:
                             cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, my_house.path_dim)
-                            self.client.queue_command(cmd) 
+                            self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
                             my_house.complete = True
@@ -334,14 +334,15 @@ class CastleGameUI:
                     if self.is_routing:
                         my_house = self.game_model.board[self.route_from_y][self.route_from_x].building
                         my_house.route(self.ROUTE_DOWN, self.cursor_x, self.cursor_y)
-                        if not my_house.is_routing: 
+                        if not my_house.is_routing:
                             cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, my_house.path_dim)
                             self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
                             my_house.complete = True
                             self.is_routing = False
-                    
+
+
                 elif e.key == K_a:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.HOUSE, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)

@@ -160,12 +160,21 @@ class CastleGamePlayerModel:
 
         self._game = game
 
+        self.is_defeated = False
+
         # Labels
         self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
 
-    def destroy(self):
+    def defeated(self):
         # called when the player is defeated
-        pass
+        # destroy all buildings
+        for building in self.buildings:
+            building.destroyed()
+        for soldier in self.soldiers:
+            soldier.destroyed()
+
+        self.is_defeated = True
+
 
     def add_building(self, building):
         self.buildings.append(building)
@@ -212,8 +221,13 @@ class CastleGamePlayerModel:
         label_color = self.LABEL_COLORS[self.pos]
         label_loc = self.LABEL_LOCS[self.pos]
 
-        money_text = "${0}".format(self.money)
-        inc_text = "${0} / second".format(self.money_increment)
+        if not self.is_defeated:
+            money_text = "${0}".format(self.money)
+            inc_text = "${0} / second".format(self.money_increment)
+        else:
+            money_text = "DEAD"
+            inc_text = "x_x"
+
         money_label = None
         inc_label = None
 

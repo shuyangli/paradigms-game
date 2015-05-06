@@ -323,6 +323,7 @@ class BasicBuilding(pygame.sprite.Sprite):
         self.player.remove_building(self)
 
     def hit_by_soldier(self, soldier):
+        print "BasicBuilding's hit_by_soldier called"
         if soldier.player.pos != self.owner:
             # cause damange if the building and the soldier are different
             soldier.die()
@@ -375,6 +376,10 @@ class Castle(BasicBuilding):
     # =================
     def update(self):
         pass
+
+    def destroyed(self):
+        # overriding destroyed to call player's defeated method
+        self.player.defeated()
 
     def isOwnedBy(self, player_pos):
         return self.player.pos == player_pos
@@ -459,7 +464,7 @@ class House(BasicBuilding):
         if not self.is_routing: # starts routing
             self.is_routing = True
             self.path = Path()
-            self.x = 225 + 50 * x 
+            self.x = 225 + 50 * x
             self.y = 75 + 50 * y
             self.prev_x = self.x
             self.prev_y = self.y
@@ -469,7 +474,7 @@ class House(BasicBuilding):
             self.player.soldiers = []
             self.complete = False
             return
-        
+
         if direction == self.ROUTE_CANCEL:
             self.is_routing = False
             self.path = None
@@ -481,7 +486,7 @@ class House(BasicBuilding):
             return
 
         if 225 + 50 * x == self.prev_x and 75 + 50 * y == self.prev_y: # check bounds
-            return 
+            return
 
         if direction == self.ROUTE_UP:
             if self.dir_list and self.dir_list[-1] == self.ROUTE_DOWN:
@@ -547,13 +552,12 @@ class House(BasicBuilding):
 
 
     def train_soldier(self):
-        # TODO: Create a soldier
         soldier = Soldier(self, self.game, self.player)
 
     def destroyed(self):
-        # TODO: Remove all soldiers
         super(House, self).destroyed()
-        pass
+        for soldier in self.soldiers:
+            soldier.die()
 
 
 class Tower(BasicBuilding):
