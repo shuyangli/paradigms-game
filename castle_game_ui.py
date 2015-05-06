@@ -85,9 +85,10 @@ class CastleGameUI:
         self.cursor_x = 0
         self.cursor_y = 0
 
-        play_label = BasicLabel(self, "PLAY", self.COLOR_BLACK, centerx="center", centery=375)
-        instr_label = BasicLabel(self, "INSTRUCTIONS", self.COLOR_BLACK, centerx="center", centery=425)
-        exit_label = BasicLabel(self, "QUIT", self.COLOR_BLACK, centerx="center", centery=475)
+        screen_centerx = self.screen.get_rect().centerx
+        play_label = BasicLabel("PLAY", self.font, self.COLOR_BLACK, centerx=screen_centerx, centery=375)
+        instr_label = BasicLabel("INSTRUCTIONS", self.font, self.COLOR_BLACK, centerx=screen_centerx, centery=425)
+        exit_label = BasicLabel("QUIT", self.font, self.COLOR_BLACK, centerx=screen_centerx, centery=475)
         self.menu_label_group = pygame.sprite.Group(play_label, instr_label, exit_label)
 
         self.cursor = Cursor(self.COLOR_RED, play_label.rect, width=4)
@@ -98,7 +99,7 @@ class CastleGameUI:
         self.cursor_x = 0
         self.cursor_y = 0
 
-        self.ready_label = BasicLabel(self, "READY", self.COLOR_BLACK, centerx="center", centery=525)
+        self.ready_label = BasicLabel("READY", self.font, self.COLOR_BLACK, centerx=self.screen.get_rect().centerx, centery=525)
         self.ready_rect = Rect(self.COLOR_GREY, [250, 550, 475, 575])
 
         # minx, maxx, miny, maxy of the four rectangles for players to choose
@@ -114,7 +115,7 @@ class CastleGameUI:
         self.cursor_x = 0
         self.cursor_y = 1
 
-        self.waiting_label = BasicLabel(self, "WAITING FOR OPPONENTS ...", self.COLOR_BLACK, centerx="center", centery=525)
+        self.waiting_label = BasicLabel("WAITING FOR OPPONENTS ...", self.font, self.COLOR_BLACK, centerx=self.screen.get_rect().centerx, centery=525)
 
 
     def transition_to_playing(self):
@@ -158,8 +159,6 @@ class CastleGameUI:
         self.cursor.draw(self.screen)
         pygame.display.flip()
 
-
-    # TODO: transition to the ready state when all people are ready
     def ui_tick_waiting(self):
         # Process events
         for e in pygame.event.get():
@@ -209,7 +208,6 @@ class CastleGameUI:
         self.cursor.draw(self.screen)
 
         pygame.display.flip()
-
 
     def ui_tick_ready(self):
         # Process events
@@ -271,6 +269,6 @@ class CastleGameUI:
         self.screen.fill(self.COLOR_WHITE)
         self.game_model.draw(self.screen)
         self.cursor.draw(self.screen)
-        # TODO: draw instructions, user labels, and so on
+        # TODO: draw instructions
 
         pygame.display.flip()
