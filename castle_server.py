@@ -139,10 +139,6 @@ class CastleServer:
     GAME_STATE_PLAYING = 2
     GAME_STATE_MENU    = 3
 
-    # Payload
-    PAYLOAD_TYPE_STATE_CHANGE = "chgstate"
-    PAYLOAD_TYPE_ALL_POSITION = "allpos"
-
     def __init__(self, port, debug=False):
         self.port = port
         self.players = []           # [conns]
