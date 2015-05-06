@@ -148,7 +148,7 @@ class CastleGameUI:
         self.cursor = Cursor(self.PLAYER_COLOR_DARK[self.client.own_position], self.game_model.board[self.cursor_y][self.cursor_x].rect)
 
         self.game_instr_label = InstructionLabel(self.client.own_position, self.screen.get_rect().centerx, 525)
-        self.isRouting = False  # determine if the user is routing
+        self.is_routing = False  # determine if the user is routing
         self.route_from_x = None  # coordinate of the house you are routing from
         self.route_from_y = None
         self.player_model = [x for x in self.game_model.player_models if x.pos == self.client.own_position][0]
@@ -292,51 +292,51 @@ class CastleGameUI:
                 if e.key == K_LEFT:
                     self.cursor_x = self.cursor_x - 1 if self.cursor_x != 0 else 0
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
-                    if self.isRouting:
+                    if self.is_routing:
                         my_house = self.game_model.board[self.route_from_y][self.route_from_x].building
                         my_house.route(self.ROUTE_LEFT, self.cursor_x, self.cursor_y)
-                        if not my_house.isRouting: # finish routing
+                        if not my_house.is_routing: # finish routing
                             cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, my_house.path_dim)
                             self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
-                            self.isRouting = False
+                            self.is_routing = False
                 elif e.key == K_RIGHT:
                     self.cursor_x = self.cursor_x + 1 if self.cursor_x != 7 else 7
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
-                    if self.isRouting:
+                    if self.is_routing:
                         my_house = self.game_model.board[self.route_from_y][self.route_from_x].building
                         my_house.route(self.ROUTE_RIGHT, self.cursor_x, self.cursor_y)
-                        if not my_house.isRouting: 
+                        if not my_house.is_routing: 
                             cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, my_house.path_dim)
                             self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
-                            self.isRouting = False
+                            self.is_routing = False
                 elif e.key == K_UP:
                     self.cursor_y = self.cursor_y - 1 if self.cursor_y != 0 else 0
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
-                    if self.isRouting:
+                    if self.is_routing:
                         my_house = self.game_model.board[self.route_from_y][self.route_from_x].building
                         my_house.route(self.ROUTE_UP, self.cursor_x, self.cursor_y)
-                        if not my_house.isRouting:
+                        if not my_house.is_routing:
                             cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, my_house.path_dim)
                             self.client.queue_command(cmd) 
                             self.route_from_x = None
                             self.route_from_y = None
-                            self.isRouting = False
+                            self.is_routing = False
                 elif e.key == K_DOWN:
                     self.cursor_y = self.cursor_y + 1 if self.cursor_y != 7 else 7
                     self.cursor.set_rect(self.game_model.board[self.cursor_y][self.cursor_x].rect)
-                    if self.isRouting:
+                    if self.is_routing:
                         my_house = self.game_model.board[self.route_from_y][self.route_from_x].building
                         my_house.route(self.ROUTE_DOWN, self.cursor_x, self.cursor_y)
-                        if not my_house.isRouting: 
+                        if not my_house.is_routing: 
                             cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, my_house.path_dim)
                             self.client.queue_command(cmd)
                             self.route_from_x = None
                             self.route_from_y = None
-                            self.isRouting = False
+                            self.is_routing = False
                     
                 elif e.key == K_a:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.HOUSE, self.cursor_x, self.cursor_y)
@@ -348,16 +348,14 @@ class CastleGameUI:
                     cmd = CastleGameCommand.Build(self.client.own_position, CastleGameCommand.Build.TOWER, self.cursor_x, self.cursor_y)
                     self.client.queue_command(cmd)
                 elif e.key == K_SPACE:
-                    if not self.isRouting:
+                    if not self.is_routing:
                         try:
                             house = self.game_model.board[self.cursor_y][self.cursor_x].building
                             if not house.isOwnedBy(self.client.own_position): continue
                             house.route(0, self.cursor_x, self.cursor_y)
                             self.route_from_x = self.cursor_x
                             self.route_from_y = self.cursor_y
-                            cmd = CastleGameCommand.Route(self.route_from_x, self.route_from_y, [])
-                            self.client.queue_command(cmd)
-                            self.isRouting = True
+                            self.is_routing = True
                         except Exception, e:
                             print "You should route from your houses."
                     elif self.route_from_x != None and self.route_from_y != None:
@@ -366,7 +364,7 @@ class CastleGameUI:
                         self.client.queue_command(cmd)
                         self.route_from_x = None
                         self.route_from_y = None
-                        self.isRouting = False
+                        self.is_routing = False
 
         # Animate
         self.cursor.update()

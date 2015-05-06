@@ -405,7 +405,7 @@ class House(BasicBuilding):
 
     def __init__(self, game, player, grid):
         BasicBuilding.__init__(self, game, player, self.HOUSE_IMG[player.pos], grid)
-        self.isRouting = False
+        self.is_routing = False
         self.prev_x = None # default of the end point of previous route
         self.prev_y = None
         self.x = None # stores the locatio
@@ -434,7 +434,7 @@ class House(BasicBuilding):
                 self.step_count = 0
                 self.state = self.STATE_READY
 
-        elif self.state == self.STATE_READY and self.path is not None:
+        elif self.state == self.STATE_READY and not self.is_routing and self.path is not None:
             self.train_soldier()
 
             # transition
@@ -453,8 +453,8 @@ class House(BasicBuilding):
     # Events
     # ======
     def route(self, direction, x, y): # x, y is the current cursor location in terms of grids
-        if not self.isRouting: # starts routing, so 
-            self.isRouting = True
+        if not self.is_routing: # starts routing
+            self.is_routing = True
             self.path = Path()
             self.x = 225 + 50 * x 
             self.y = 75 + 50 * y
@@ -465,7 +465,7 @@ class House(BasicBuilding):
             return
         
         if direction == self.ROUTE_CANCEL:
-            self.isRouting = False
+            self.is_routing = False
             self.path = None
             self.prev_x = self.x
             self.prev_y = self.y
@@ -534,7 +534,7 @@ class House(BasicBuilding):
                 self.dir_list.append(direction)
         building_at_new_pos = self.game.grid_for_coordinates(self.prev_x, self.prev_y).building
         if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player.pos):
-            self.isRouting = False
+            self.is_routing = False
             self.path.destination = building_at_new_pos
             self.dir_list = []
 
