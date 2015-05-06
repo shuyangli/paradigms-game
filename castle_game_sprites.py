@@ -430,40 +430,34 @@ class Path(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.destination = None
         self.pathSections = []
-"""
-    def onWhichPathSection(self, soldier):
-        for pathSection in self.pathSections:
-            if pathSection.passesPoint(soldier.x, soldier.y):
-                return pathSection
-        return None
 
-    def whereToGo(self, soldier):
-        return None
-"""
+    def pushBackPathSection(self, pathSection):
+        self.pathSections.append(pathSection)
+
+    def popBackPathSection(self):
+        self.pathSections = self.pathSections[:-1]
+
+    def setDestination(self, enemy_building):
+        self.destination = enemy_building
 
 class PathSection(pygame.sprite.Sprite):
-    def __init__(self, color, start_x, start_y, end_x, end_y, width):
+    def __init__(self, color, x1, y1, x2, y2, width):
         pygame.sprite.Sprite.__init__(self)
-        self.start_x = start_x
-        self.start_y = start_y
-        self.end_x = end_x
-        self.end_y = end_y
+        self.x1 = self.x1
+        self.y1 = self.y1
+        self.x2 = self.x2
+        self.y2 = self.y2
 
+        # drawing
         self.image = None
         if self.start_x == self.end_x: # vertical
             self.image = pygame.Surface([width, abs(self.end_y - self.start_y)])
         elif self.start_y == self.end_y: # horizontal
             self.image = pygame.Surface([abs(self.end_x - self.start_x), width])
+        else return
         self.image.fill(color)
         self.rect = self.image.get_rect()
-        self.rect.centerx = (start_x + start_y) / 2
-        self.rect.centery = (end_x + end_y) / 2
-        self.next_from_start = []
-        self.next_from_end = []
+        self.rect.centerx = (self.x1 + self.x2) / 2
+        self.rect.centery = (self.y1 + self.y2) / 2
 
-    def doesConnectEnemyBuilding(self):
-        return False
-
-    def passesPoint(self, x, y):
-        return ((x == self.start_x and (y - self.start_y)*(y - self.end_y) <= 0) or
-            (y == self.start_y and (x - self.start_x)*(x - self.end_x) <= 0))
+    
