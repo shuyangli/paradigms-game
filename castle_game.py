@@ -1,4 +1,5 @@
 from castle_game_sprites import *
+import pickle
 import time
 
 class CastleGameCommand:
@@ -89,40 +90,32 @@ class CastleGameCommand:
 
 
     class Route:
-        # TODO: create paths for houses
-        def __init__(self, player_pos, x, y):
-            print "*****Shuyang's dancing..."
-            self.player_pos = player_pos
-            self.x = x
-            self.y = y
+        # TODO: print routes
+        def __init__(self, house_x, house_y, path_dim):
+            self.house_x = house_x
+            self.house_y = house_y
+            self.path_dim = path_dim
 
         def apply_to(self, game):
-            # TODO
             print "[TODO] Route's apply_to called"
-            player = [x for x in game.player_models if x.pos == self.player_pos][0]
-
-            try:
-                game.board[self.y][self.x].building.route()
-
-            except Exception, e:
-                print "Routing failed."
-
-            return
+            # copy out route
+            house = game.board[self.house_y][self.house_x].building
+            house.reload_path_from_dimensions(self.path_dim)
 
         def serialize(self):
             return "R{0}{1}{2}{3}{4}{5}".format(
                 CastleGameCommand.CMD_SEPARATOR,
-                self.player_pos,
+                self.house_x,
                 CastleGameCommand.CMD_SEPARATOR,
-                self.x,
+                self.house_y,
                 CastleGameCommand.CMD_SEPARATOR,
-                self.y
+                pickle.dumps(self.path_dim)
             )
 
         @classmethod
         def deserialize(cls, encoded):
-            _, player_pos, x, y = encoded.split(CastleGameCommand.CMD_SEPARATOR)
-            return cls(int(player_pos), int(x), int(y))
+            _, house_x, house_y, path_dim = encoded.split(CastleGameCommand.CMD_SEPARATOR)
+            return cls(int(house_x), int(house_y), pickle.loads(path_dim))
 
     @classmethod
     def decode_command(cls, encoded):   # take a string

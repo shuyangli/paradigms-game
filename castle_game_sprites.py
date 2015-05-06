@@ -313,11 +313,8 @@ class BasicBuilding(pygame.sprite.Sprite):
     def tick_lock_step(self):
         pass
 
-    def isOwnedBy(self, player):
-        print "BasicBuilding: isOwnedBy"
-        print self.player
-        print player
-        return self.player is player
+    def isOwnedBy(self, player_pos):
+        return self.player.pos == player_pos
 
     # ======
     # Events
@@ -381,11 +378,8 @@ class Castle(BasicBuilding):
     def update(self):
         pass
 
-    def isOwnedBy(self, player):
-        print "Castle: isOwnedBy"
-        print self.player
-        print player
-        return self.player is player
+    def isOwnedBy(self, player_pos):
+        return self.player.pos == player_pos
 
 
 class House(BasicBuilding):
@@ -417,8 +411,15 @@ class House(BasicBuilding):
         self.prev_x = None # default of the end point of previous route
         self.prev_y = None
         self.path = None
+        self.path_dim = [] # used for pickling of the path object
         self.dir_list = [] # list of directions
         self.color = self.COLORS[player.pos]
+
+    def reload_path_from_dimensions(self, path_dim):
+        self.path = Path()
+        for section in path_dim:
+            new_section = PathSection(*section)
+            self.path.pathSections.append(new_section)
 
     # =================
     # Ticking mechanism
@@ -460,22 +461,24 @@ class House(BasicBuilding):
             self.prev_y = 75 + 50 * y
             self.dir_list.append(0)
         else:
-            # TODO: check boundaries
             if direction == self.ROUTE_CANCEL:
                 self.path = None
+                self.path_dim = []
                 self.prev_x = None
                 self.prev_y = None
                 self.dir_list = []
                 self.isRouting = False
                 return
-            if 225 + 50 * x == self.prev_x and 75 + 50 * y == self.prev_y: return
+            if 225 + 50 * x == self.prev_x and 75 + 50 * y == self.prev_y: return # check boundaries
             if direction == self.ROUTE_UP:
                 if self.dir_list[-1] == self.ROUTE_DOWN:
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
+                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y - 50, 4)
                     self.prev_y = self.prev_y - 50
                     self.path.pushBackPathSection(new_path)
@@ -485,8 +488,10 @@ class House(BasicBuilding):
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
+                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x, self.prev_y + 50, 4)
                     self.prev_y = self.prev_y + 50
                     self.path.pushBackPathSection(new_path)
@@ -496,8 +501,10 @@ class House(BasicBuilding):
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
+                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x - 50, self.prev_y, 4)
                     self.prev_x = self.prev_x - 50
                     self.path.pushBackPathSection(new_path)
@@ -507,15 +514,18 @@ class House(BasicBuilding):
                     self.prev_x = self.path.pathSections[-1].x1
                     self.prev_y = self.path.pathSections[-1].y1
                     self.path.popBackPathSection()
+                    self.path_dim.pop(-1)
                     self.dir_list.pop(-1)
                 else:
+                    self.path_dim.append((self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4))
                     new_path = PathSection(self.color, self.prev_x, self.prev_y, self.prev_x + 50, self.prev_y, 4)
                     self.prev_x = self.prev_x + 50
                     self.path.pushBackPathSection(new_path)
                     self.dir_list.append(direction)
             building_at_new_pos = self.game.grid_for_coordinates(self.prev_x, self.prev_y).building
-            if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player):
+            if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player.pos):
                 self.isRouting = False
+                self.path.destination = building_at_new_pos
 
 
     def train_soldier(self):
@@ -688,7 +698,6 @@ class Soldier(pygame.sprite.Sprite):
         return rect
 
 
-
 class Path(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -703,6 +712,7 @@ class Path(pygame.sprite.Sprite):
 
     def setDestination(self, enemy_building):
         self.destination = enemy_building
+
 
 class PathSection(pygame.sprite.Sprite):
     def __init__(self, color, x1, y1, x2, y2, width):
