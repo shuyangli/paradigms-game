@@ -465,6 +465,8 @@ class House(BasicBuilding):
             self.prev_y = self.y
             self.dir_list = []
             self.path_dim = []
+            self.soldiers = [] # TODO: Not sure if this is a good way to do it
+            self.player.soldiers = []
             self.complete = False
             return
         
