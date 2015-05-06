@@ -313,6 +313,12 @@ class BasicBuilding(pygame.sprite.Sprite):
     def tick_lock_step(self):
         pass
 
+    def isOwnedBy(self, player):
+        print "BasicBuilding: isOwnedBy"
+        print self.player
+        print player
+        return self.player is player
+
     # ======
     # Events
     # ======
@@ -367,6 +373,7 @@ class Castle(pygame.sprite.Sprite):
 
     def __init__(self, game, player, grid):
         self.owner = player.pos
+        self.player = player
         self.game = game
         self.grid = grid
         self.image = self.CASTLE_IMG[self.owner]
@@ -378,6 +385,12 @@ class Castle(pygame.sprite.Sprite):
     # =================
     def update(self):
         pass
+
+    def isOwnedBy(self, player):
+        print "Castle: isOwnedBy"
+        print self.player
+        print player
+        return self.player is player
 
 
 class House(BasicBuilding):
@@ -505,6 +518,9 @@ class House(BasicBuilding):
                     self.prev_x = self.prev_x + 50
                     self.path.pushBackPathSection(new_path)
                     self.dir_list.append(direction)
+            building_at_new_pos = self.game.grid_for_coordinates(self.prev_x, self.prev_y).building
+            if building_at_new_pos != None and not building_at_new_pos.isOwnedBy(self.player):
+                self.isRouting = False
 
 
     def train_soldier(self):
