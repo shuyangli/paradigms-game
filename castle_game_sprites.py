@@ -233,6 +233,7 @@ class BoardGrid(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.owners = []
         self.building = None
+        self.soldiers = []
 
         self.x = x
         self.y = y
@@ -632,7 +633,14 @@ class Tower(BasicBuilding):
     # Events
     # ======
     def attack(self):
-        # TODO
+        surrounding_grids = self.game.grids_surrounding(self.grid.x, self.grid.y)
+
+        for grid in surrounding_grids:
+            for soldier in grid.soldiers:
+                if soldier.player.pos != self.owner:
+                    soldier.die()
+                    return True
+
         return False
 
 
@@ -722,13 +730,19 @@ class Soldier(pygame.sprite.Sprite):
         # check collision with grid
         current_grid = self.game.grid_for_coordinates(self.current_x, self.current_y)
         if current_grid != self.current_grid:
-            # TODO: remove soldier from the previous grid, and install it in the new grid
+            # remove soldier from the previous grid, and install it in the new grid
             # this is for easy tower attacking
-            pass
+            if self in self.current_grid.soldiers:
+                self.current_grid.soldiers.remove(self)
+            if self not in current_grid.soldiers:
+                current_grid.soldiers.append(self)
+            self.current_grid = current_grid
 
         if current_grid.building is not None:
             # hit building
             current_grid.building.hit_by_soldier(self)
+            if self in current_grid.soldiers:
+                current_grid.soldiers.remove(self)
 
     def tick_lock_step(self):
         pass
@@ -737,6 +751,8 @@ class Soldier(pygame.sprite.Sprite):
     # Events
     # ======
     def die(self):
+        if self in self.current_grid.soldiers:
+            self.current_grid.soldiers.remove(self)
         if self in self.house.soldiers:
             self.house.soldiers.remove(self)
         if self in self.player.soldiers:
