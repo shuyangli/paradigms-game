@@ -338,7 +338,7 @@ class BasicBuilding(pygame.sprite.Sprite):
             # cause damange if the building and the soldier are different
             soldier.die()
             self.hp -= soldier.damage
-            if self.hp < 0:
+            if self.hp <= 0:
                 self.destroyed()
 
     @property
