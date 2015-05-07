@@ -180,11 +180,13 @@ class CastleGamePlayerModel:
         self.buildings.append(building)
 
     def remove_building(self, building):
+        print self.buildings
+
         self.buildings.remove(building)
         # also remove owner from grids around the building's grid
         for grid in self._game.grids_surrounding(building.grid.x, building.grid.y):
             grid.owners.reverse()
-            grid.owners.remove(self.player_pos)
+            grid.owners.remove(self.pos)
             grid.owners.reverse()
 
     # =================

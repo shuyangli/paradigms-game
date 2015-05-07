@@ -9,6 +9,12 @@ PLAYER_PINK = 1
 PLAYER_CYAN = 2
 PLAYER_ORANGE = 3
 
+COLOR_DARK_PURPLE = (118, 66, 200)
+COLOR_DARK_CYAN = (39, 190, 173)
+COLOR_DARK_PINK = (192, 62, 62)
+COLOR_DARK_ORANGE = (200, 146, 37)
+PLAYER_COLOR_DARK = [COLOR_DARK_PURPLE, COLOR_DARK_PINK, COLOR_DARK_CYAN, COLOR_DARK_ORANGE]
+
 # ===========
 # UI elements
 # ===========
@@ -323,6 +329,7 @@ class BasicBuilding(pygame.sprite.Sprite):
     # Events
     # ======
     def destroyed(self):
+        self.grid._set_building(None)
         self.player.remove_building(self)
 
     def hit_by_soldier(self, soldier):
@@ -353,8 +360,19 @@ class BasicBuilding(pygame.sprite.Sprite):
             img.blit(rotated, rotated_rect)
 
         if self.hp < self.max_hp:
-            # TODO: hp not full, we also blit a hp bar
-            pass
+            # hp is not full, we also blit a hp bar
+            damage_fraction = float(self.max_hp - self.hp) / self.max_hp
+            bar_width = self.grid.rect.width
+            bar_height = int(self.grid.rect.height * damage_fraction)
+
+            damage_bar = pygame.Surface((bar_width, bar_height))
+            damage_bar.fill(PLAYER_COLOR_DARK[self.owner])
+            damage_bar.set_alpha(100)
+
+            damage_rect = damage_bar.get_rect()
+            damage_rect.bottom = self.grid.rect.height
+
+            img.blit(damage_bar, damage_rect)
 
         return img
 
