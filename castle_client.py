@@ -127,6 +127,7 @@ class CastleClient:
     GAME_STATE_MENU    = 3
 
     GAME_STATE_INSTRUCTIONS = 4
+    GAME_STATE_FINISH = 5
 
     # For synchronized ticking mechanism
     lock_step_id = 0
@@ -197,6 +198,11 @@ class CastleClient:
         if DEBUG:
             self.last_time_lockstep = time.time()
             self.last_time_ui = time.time()
+
+    def change_state_finish(self):
+        self.game_ui.transition_to_finish()
+        self.current_state = self.GAME_STATE_FINISH
+        self.conn.sendStateChange(self.current_state)
 
     def change_state_end_game(self):
         self.current_state = self.GAME_STATE_MENU
@@ -289,6 +295,9 @@ class CastleClient:
                 self.game_frame_id = 0
 
             self.game_ui.ui_tick_game()
+
+        elif self.current_state == self.GAME_STATE_FINISH:
+            self.game_ui.ui_tick_finish()
 
             # DEBUG: fps
             # if DEBUG:

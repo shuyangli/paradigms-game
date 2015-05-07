@@ -309,11 +309,10 @@ class CastleGameModel:
         if surviving_players_count == 1:
             surviving_player = [x for x in self.player_models if not x.is_defeated][0]
             if surviving_player == self.current_player:
-                # TODO
-                print "You win!"
+                self.game_ui.is_winning_player = True
             else:
-                print "You lose :("
-            self.game_ui.exit()
+                self.game_ui.is_winning_player = False
+            self.game_ui.client.change_state_finish()
 
 
     def tick_ui(self):

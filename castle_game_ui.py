@@ -153,6 +153,9 @@ class CastleGameUI:
         self.route_from_y = None
         self.player_model = [x for x in self.game_model.player_models if x.pos == self.client.own_position][0]
 
+    def transition_to_finish(self):
+        pass
+
     # ===============================
     # Ticking mechanism
     # These are called every UI frame
@@ -280,6 +283,20 @@ class CastleGameUI:
 
         # Draw logo
         self.screen.blit(self.logo, self.logo_rect)
+        pygame.display.flip()
+
+    def ui_tick_finish(self):
+        for e in pygame.event.get():
+            if e.type == KEYDOWN:
+                self.exit()
+
+        self.screen.fill(self.COLOR_WHITE)
+        label = None
+        if self.is_winning_player:
+            label = BasicLabel("YOU WIN!", self.font, (0, 0, 0), centerx=self.screen.get_rect().centerx, centery=self.screen.get_rect().centery)
+        else:
+            label = BasicLabel("YOU LOSE:(", self.font, (0, 0, 0), centerx=self.screen.get_rect().centerx, centery=self.screen.get_rect().centery)
+        self.screen.blit(label.image, label.rect)
         pygame.display.flip()
 
 
