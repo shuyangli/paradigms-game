@@ -67,7 +67,7 @@ class CastleGameUI:
         self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
 
         pygame.mixer.music.load("assets/sound/ice-cream-sandwich.ogg")
-        # pygame.mixer.music.play(-1, 0.0)
+        pygame.mixer.music.play(-1, 0.0)
 
 
     def set_client(self, client):
