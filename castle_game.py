@@ -119,12 +119,12 @@ class CastleGamePlayerModel:
     FONT_NAME = None
     FONT_SIZE = 26
 
-    def __init__(self, game, pos, castle_grid, buildings=[], soldiers=[]):
+    def __init__(self, game, pos, castle_grid):
         # TODO: clean this up
         self.pos = pos
         self.castle_grid = castle_grid
-        self.buildings = buildings  # [buildings]
-        self.soldiers = soldiers    # [soldiers]
+        self.buildings = []  # [buildings]
+        self.soldiers = []    # [soldiers]
 
         self.castle = Castle(game, self, self.castle_grid)
         self.castle_grid._set_building(self.castle)
@@ -157,8 +157,6 @@ class CastleGamePlayerModel:
         self.buildings.append(building)
 
     def remove_building(self, building):
-        print self.buildings
-
         self.buildings.remove(building)
         # also remove owner from grids around the building's grid
         for grid in self._game.grids_surrounding(building.grid.x, building.grid.y):
