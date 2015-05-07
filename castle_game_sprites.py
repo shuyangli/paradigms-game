@@ -448,10 +448,16 @@ class House(BasicBuilding):
 
 
     def reload_path_from_dimensions(self, path_dim):
+        self.reset_path()
+
         self.path = Path()
+        self.complete = True
         for section in path_dim:
             new_section = PathSection(*section)
             self.path.pathSections.append(new_section)
+
+    def reset_path(self):
+        self.complete = False
 
     # =================
     # Ticking mechanism
@@ -494,8 +500,10 @@ class House(BasicBuilding):
             self.prev_y = self.y
             self.dir_list = []
             self.path_dim = []
-            self.soldiers = [] # TODO: Not sure if this is a good way to do it
-            self.player.soldiers = []
+
+            for soldier in self.soldiers:
+                soldier.die()
+
             self.complete = False
             return
 
