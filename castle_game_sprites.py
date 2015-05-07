@@ -458,6 +458,7 @@ class House(BasicBuilding):
 
     def reset_path(self):
         self.complete = False
+        self.path = None
 
     # =================
     # Ticking mechanism
@@ -714,6 +715,9 @@ class Soldier(pygame.sprite.Sprite):
         self.current_x = self.house.rect.centerx
         self.current_y = self.house.rect.centery
 
+        self.lockstep_x = self.current_x
+        self.lockstep_y = self.current_y
+
         self.damage = self.DEFAULT_DAMAGE
 
         self.house.soldiers.append(self)
@@ -753,6 +757,7 @@ class Soldier(pygame.sprite.Sprite):
                 current_grid.soldiers.remove(self)
 
     def tick_lock_step(self):
+        # TODO: fix lockstep desync
         pass
 
     # ======

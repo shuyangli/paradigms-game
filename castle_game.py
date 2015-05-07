@@ -2,6 +2,40 @@ from castle_game_sprites import *
 import pickle
 import time
 
+
+class CastleGameImmediateCommand:
+    CMD_SEPARATOR = "#"
+
+    class BeginRouting:
+        def __init__(self, house_x, house_y):
+            self.house_x = house_x
+            self.house_y = house_y
+
+        def apply_to(self, game):
+            house = game.board[self.house_y][self.house_x].building
+            house.reset_path()
+
+        def serialize(self):
+            return "T{0}{1}{2}{3}".format(
+                CastleGameImmediateCommand.CMD_SEPARATOR,
+                self.house_x,
+                CastleGameImmediateCommand.CMD_SEPARATOR,
+                self.house_y
+            )
+
+        @classmethod
+        def deserialize(cls, encoded):
+            _, house_x, house_y = encoded.split(CastleGameImmediateCommand.CMD_SEPARATOR)
+            return cls(int(house_x), int(house_y))
+
+    @classmethod
+    def decode_command(cls, encoded):   # take a string
+        if encoded[0] == "T":
+            return cls.BeginRouting.deserialize(encoded)
+        else:
+            raise ValueError("Unknown encoded command: {0}".format(encoded))
+
+
 class CastleGameCommand:
     """Wrapper class for game commands and command deserializer."""
     CMD_SEPARATOR = "#"
@@ -110,7 +144,7 @@ class CastleGamePlayerModel:
     LABEL_COLORS = [(118, 66, 200), (192, 62, 62), (39, 190, 173), (200, 146, 37)]
 
     # Default value
-    INITIAL_MONEY = 1000 # TODO: Change it back
+    INITIAL_MONEY = 50
     INITIAL_MONEY_INCREMENT = 5
 
     last_time = 0
@@ -123,8 +157,8 @@ class CastleGamePlayerModel:
         # TODO: clean this up
         self.pos = pos
         self.castle_grid = castle_grid
-        self.buildings = []  # [buildings]
-        self.soldiers = []    # [soldiers]
+        self.buildings = []     # [buildings]
+        self.soldiers = []      # [soldiers]
 
         self.castle = Castle(game, self, self.castle_grid)
         self.castle_grid._set_building(self.castle)
@@ -151,6 +185,7 @@ class CastleGamePlayerModel:
             soldier.die()
 
         self.is_defeated = True
+        self._game.check_end()
 
 
     def add_building(self, building):
@@ -229,10 +264,11 @@ class CastleGameModel:
     WIDTH = 8
     HEIGHT = 8
 
-    def __init__(self, all_players_pos, current_player_pos, debug=False):
+    def __init__(self, game_ui, all_players_pos, current_player_pos, debug=False):
         global DEBUG
         DEBUG = debug
 
+        self.game_ui = game_ui
         self.board = [[BoardGrid(x, y) for x in range(self.WIDTH)] for y in range(self.HEIGHT)]
 
         # Set default owners
@@ -262,9 +298,23 @@ class CastleGameModel:
             player = CastleGamePlayerModel(self, PLAYER_ORANGE, self.board[self.HEIGHT-1][0])
             self.player_models.append(player)
 
+        self.current_player = [x for x in self.player_models if x.pos == current_player_pos][0]
+
 
     def prepare_game(self, client):
         pass
+
+    def check_end(self):
+        surviving_players_count = reduce(lambda acc, itm: acc + 1 if not itm.is_defeated else acc, self.player_models, 0)
+        if surviving_players_count == 1:
+            surviving_player = [x for x in self.player_models if not x.is_defeated][0]
+            if surviving_player == self.current_player:
+                # TODO
+                print "You win!"
+            else:
+                print "You lose :("
+            self.game_ui.exit()
+
 
     def tick_ui(self):
         # called every ui frame

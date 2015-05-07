@@ -83,7 +83,7 @@ class CastleGameUI:
     # Starting a new game
     # ===================
     def start_game(self, all_players_pos, current_player_pos):
-        self.game_model = CastleGameModel(all_players_pos, current_player_pos, DEBUG)
+        self.game_model = CastleGameModel(self, all_players_pos, current_player_pos, DEBUG)
         self.client.set_game_model(self.game_model)
 
     def end_game(self):
@@ -256,6 +256,7 @@ class CastleGameUI:
         # Draw logo
         self.screen.blit(self.logo, self.logo_rect)
         pygame.display.flip()
+
 
     def ui_tick_ready(self):
         # Process events
