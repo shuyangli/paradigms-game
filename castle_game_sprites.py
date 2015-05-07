@@ -315,6 +315,9 @@ class BasicBuilding(pygame.sprite.Sprite):
 
         self.state = self.STATE_BUILDING
 
+    def __str__(self):
+        return "<{0}> at ({1}, {2})".format(self.__class__, self.grid.x, self.grid.y)
+
     def update(self):
         # called every ui frame for animation
         self._ui_frame_count = (self._ui_frame_count + 1) % 28
@@ -330,10 +333,15 @@ class BasicBuilding(pygame.sprite.Sprite):
     # ======
     def destroyed(self):
         self.grid._set_building(None)
-        self.player.remove_building(self)
+        if self in self.player.buildings:
+            print "========="
+            print "REMOVING"
+            print self
+            print self.player
+            print "========="
+            self.player.remove_building(self)
 
     def hit_by_soldier(self, soldier):
-        print "BasicBuilding's hit_by_soldier called"
         if soldier.player.pos != self.owner:
             # cause damange if the building and the soldier are different
             soldier.die()
@@ -391,12 +399,6 @@ class Castle(BasicBuilding):
     def __init__(self, game, player, grid):
         BasicBuilding.__init__(self, game, player, self.CASTLE_IMG[player.pos], grid, max_hp=200)
         self.state = self.STATE_READY
-
-    # =================
-    # Ticking mechanism
-    # =================
-    def update(self):
-        pass
 
     def destroyed(self):
         # overriding destroyed to call player's defeated method
@@ -735,8 +737,10 @@ class Soldier(pygame.sprite.Sprite):
     # Events
     # ======
     def die(self):
-        self.house.soldiers.remove(self)
-        self.player.soldiers.remove(self)
+        if self in self.house.soldiers:
+            self.house.soldiers.remove(self)
+        if self in self.player.soldiers:
+            self.player.soldiers.remove(self)
 
 
     @property

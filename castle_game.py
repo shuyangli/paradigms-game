@@ -27,6 +27,8 @@ class CastleGameCommand:
             return "<Build>Player: {0}, Building: {1}, Position: {2}".format(self.player_pos, self.building, (self.x, self.y))
 
         def apply_to(self, game):
+            assert len([x for x in game.player_models if x.pos == self.player_pos]) == 1
+
             player = [x for x in game.player_models if x.pos == self.player_pos][0]
             new_building = self.NAME_TO_CLS[self.building](game, player, game.board[self.y][self.x])
 
@@ -63,32 +65,6 @@ class CastleGameCommand:
             return cls(int(player_pos), building, int(x), int(y))
 
 
-    class Destroy:
-        def __init__(self, x, y):
-            self.x = x
-            self.y = y
-
-        def apply_to(self, game):
-            # TODO
-            print "[TODO] Destroy's apply_to called"
-            return
-
-        def serialize(self):
-            return "D{0}{1}{2}{3}{4}{5}".format(
-                CastleGameCommand.CMD_SEPARATOR,
-                self.player_pos,
-                CastleGameCommand.CMD_SEPARATOR,
-                self.x,
-                CastleGameCommand.CMD_SEPARATOR,
-                self.y
-            )
-
-        @classmethod
-        def deserialize(cls, encoded):
-            _, player_pos, x, y = encoded.split(CastleGameCommand.CMD_SEPARATOR)
-            return cls(int(player_pos), int(x), int(y))
-
-
     class Route:
         # TODO: print routes
         def __init__(self, house_x, house_y, path_dim):
@@ -120,8 +96,6 @@ class CastleGameCommand:
     def decode_command(cls, encoded):   # take a string
         if encoded[0] == "B":
             return cls.Build.deserialize(encoded)
-        elif encoded[0] == "D":
-            return cls.Destroy.deserialize(encoded)
         elif encoded[0] == "R":
             return cls.Route.deserialize(encoded)
         else:
@@ -165,13 +139,16 @@ class CastleGamePlayerModel:
         # Labels
         self.font = pygame.font.Font(self.FONT_NAME, self.FONT_SIZE)
 
+    def __str__(self):
+        return "<Player> {0}".format(self.pos)
+
     def defeated(self):
         # called when the player is defeated
         # destroy all buildings
         for building in self.buildings:
             building.destroyed()
         for soldier in self.soldiers:
-            soldier.destroyed()
+            soldier.die()
 
         self.is_defeated = True
 
